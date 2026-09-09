@@ -32,12 +32,12 @@ namespace proyecto_integrador.models
 
         public decimal CalcularCostoTotal()
         {
-            decimal total = Salon.costoBase;
-            total += (cantidadDeAdultosQueAsisten * menuDeComidaSegunAsistencia.costoPorAdulto);
-            total += (cantidadDeNiñosQueAsisten * menuDeComidaSegunAsistencia.costoPorNiño);
+            decimal total = salonDelEvento.CostoBase;
+            total += (cantidadDeAdultosQueAsisten * menuDeComidaSegunAsistencia.CostoPorAdulto);
+            total += (cantidadDeNiñosQueAsisten * menuDeComidaSegunAsistencia.CostoPorNiño);
             foreach (var servicio in serviciosAdicionales)
             {
-                total += servicio.costoDelServicio;
+                total += servicio.CostoDelServicio;
             }
             return total;
         }
