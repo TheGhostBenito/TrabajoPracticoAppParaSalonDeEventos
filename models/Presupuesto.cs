@@ -33,6 +33,7 @@ namespace proyecto_integrador.models
         public decimal CalcularCostoTotal()
         {
             decimal total = salonDelEvento.CostoBase;
+            total *= duracionDelEventoEnHoras;
             total += (cantidadDeAdultosQueAsisten * menuDeComidaSegunAsistencia.CostoPorAdulto);
             total += (cantidadDeNiñosQueAsisten * menuDeComidaSegunAsistencia.CostoPorNiño);
             foreach (var servicio in serviciosAdicionales)
