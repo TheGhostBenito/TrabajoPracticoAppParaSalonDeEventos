@@ -18,5 +18,10 @@ namespace proyecto_integrador.models
             descripcion = _descripcion;
             montoFijo = _montoFijo;
         }
+
+        public decimal CostoDelServicio
+        {
+            get { return montoFijo; }
+        }
     }
 }

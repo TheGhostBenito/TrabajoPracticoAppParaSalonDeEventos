@@ -22,5 +22,17 @@ namespace proyecto_integrador.models
             costoPorAdulto = _costoPorAdulto;
             costoPorNiño = _costoPorNiño;
         }
+
+
+
+        public decimal CostoPorAdulto
+        {
+            get { return costoPorAdulto; }
+        }
+
+        public decimal CostoPorNiño
+        {
+            get { return costoPorNiño; }
+        }
     }
 }

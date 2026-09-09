@@ -21,6 +21,11 @@ namespace proyecto_integrador.models
             costoBase = _costoBase;
         }
 
-    }
 
+        public decimal CostoBase
+        {
+            get { return costoBase; }
+        }
+
+    }
 }
