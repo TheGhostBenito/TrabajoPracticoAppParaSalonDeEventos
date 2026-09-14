@@ -21,6 +21,12 @@ namespace proyecto_integrador.models
 
         public decimal CostoDelServicio
         {
+            set { 
+                if (value >= 0)
+                {
+                    montoFijo = value;
+                }
+            }
             get { return montoFijo; }
         }
     }
