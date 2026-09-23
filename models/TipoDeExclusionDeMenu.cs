@@ -11,7 +11,7 @@ namespace proyecto_integrador.models
         Ninguna,
         Celiaco,
         Vegetariano,
-        Diabetico
+        Diabetico,
+        Vegano
     }
-
 }

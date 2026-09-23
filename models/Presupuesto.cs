@@ -3,43 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace proyecto_integrador.models
 {
     public class Presupuesto
     {
-        private int id ;
-        private DateTime fechaCreacionDePresupuesto ;
+        private int id;
+        private DateTime fechaCreacionDePresupuesto;
         private Evento evento;
         private Salon salonDelEvento;
-        private MenuDeComida menuDeComidaSegunAsistencia;
+        private List<DetalleDeMenus> menues;
         private List<ServiciosAdicionales> serviciosAdicionales;
-        private TipoDeExclusionDeMenu exclusionDeMenu;
 
-
-        public Presupuesto(int _id, DateTime _fechaCreacion, Evento _evento, Salon _salon, MenuDeComida _menu, List<ServiciosAdicionales> _serviciosAdicionales, TipoDeExclusionDeMenu _exclusion)
+        public Presupuesto(int _id, DateTime _fechaCreacion, Evento _evento, Salon _salon, List<DetalleDeMenus> _menues, List<ServiciosAdicionales> _serviciosAdicionales)
         {
             id = _id;
             fechaCreacionDePresupuesto = _fechaCreacion;
             evento = _evento;
             salonDelEvento = _salon;
-            menuDeComidaSegunAsistencia = _menu;
+            menues = _menues;
             serviciosAdicionales = _serviciosAdicionales;
-            exclusionDeMenu = _exclusion;
         }
 
         public decimal CalcularCostoTotal()
         {
-            decimal total = salonDelEvento.CostoBase; // Trae el costo base del salón
+            decimal total = salonDelEvento.CostoBase;
+            total *= evento.Duracion;
 
-            total *= evento.Duracion; // Multiplicamos por la duración del evento
+            foreach (var detalle in menues)
+            {
+                total += detalle.CantidadDeMenusUnitaria * detalle.MenuElegido.CostoPorAdulto;
+                total += detalle.CantidadDeMenusConExcepciones * detalle.MenuElegido.CostoPorAdulto;
+            }
 
-            // Usamos las cantidades del evento
-            total += (evento.CantidadAdultos * menuDeComidaSegunAsistencia.CostoPorAdulto);
-            total += (evento.CantidadNinos * menuDeComidaSegunAsistencia.CostoPorNiño);
-
-            // Sumamos servicios adicionales
             foreach (var servicio in serviciosAdicionales)
             {
                 total += servicio.CostoDelServicio;
@@ -48,6 +44,4 @@ namespace proyecto_integrador.models
             return total;
         }
     }
-
-
 }
