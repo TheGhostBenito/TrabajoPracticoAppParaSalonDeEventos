@@ -49,5 +49,3 @@ namespace proyecto_integrador.models
         }
     }
 }
-
-fd
