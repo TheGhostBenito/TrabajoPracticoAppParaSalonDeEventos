@@ -27,11 +27,31 @@ namespace proyecto_integrador.models
 
         public decimal CostoPorAdulto
         {
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("El costo por adulto no puede ser negativo.");
+                }
+                costoPorAdulto = value;
+            }
+
             get { return costoPorAdulto; }
         }
 
         public decimal CostoPorNiño
+
         {
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("El costo por niño no puede ser negativo.");
+                }
+                costoPorNiño = value;
+            }
+
+
             get { return costoPorNiño; }
         }
     }

@@ -22,8 +22,18 @@ namespace proyecto_integrador.models
         }
 
 
-        public decimal CostoBase
+        public decimal CostoBase  //getter y setter del costo base del salon
         {
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("El costo base no puede ser negativo.");
+                }
+                costoBase = value;
+            }
+
+
             get { return costoBase; }
         }
 

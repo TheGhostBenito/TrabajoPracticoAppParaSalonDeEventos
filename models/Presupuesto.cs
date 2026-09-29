@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using proyecto_integrador.repository;
 
 namespace proyecto_integrador.models
 {
@@ -13,9 +14,9 @@ namespace proyecto_integrador.models
         private Evento evento;
         private Salon salonDelEvento;
         private List<DetalleDeMenus> menues;
-        private List<ServiciosAdicionales> serviciosAdicionales;
+        private ServiciosAdicionalesRepository serviciosAdicionales;
 
-        public Presupuesto(int _id, DateTime _fechaCreacion, Evento _evento, Salon _salon, List<DetalleDeMenus> _menues, List<ServiciosAdicionales> _serviciosAdicionales)
+        public Presupuesto(int _id, DateTime _fechaCreacion, Evento _evento, Salon _salon, List<DetalleDeMenus> _menues, ServiciosAdicionalesRepository _serviciosAdicionales)
         {
             id = _id;
             fechaCreacionDePresupuesto = _fechaCreacion;

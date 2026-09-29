@@ -23,16 +23,42 @@ namespace proyecto_integrador.models
 
         public int Duracion
         {
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("La duración del evento no puede ser negativa.");
+                }
+                DuracionDelEventoEnHoras = value;
+            }
+
             get { return DuracionDelEventoEnHoras; }
         }
 
         public int CantidadAdultos
         {
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("La cantidad de adultos no puede ser negativa.");
+                }
+                CantidadDeAdultosQueAsisten = value;
+            }
+
             get { return CantidadDeAdultosQueAsisten; }
         }
 
         public int CantidadNinos
         {
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("La cantidad de niños no puede ser negativa.");
+                }
+                CantidadDeNiñosQueAsisten = value;
+            }
             get { return CantidadDeNiñosQueAsisten; }
 
         }
