@@ -28,21 +28,30 @@ namespace proyecto_integrador.models
 
         public decimal CalcularCostoTotal()
         {
-            decimal total = salonDelEvento.CostoBase;
-            total *= evento.Duracion;
-
-            foreach (var detalle in menues)
+            if(salonDelEvento == null || evento == null || menues == null || serviciosAdicionales == null) // Verificar si alguno de los datos necesarios es nulo
             {
-                total += detalle.CantidadDeMenusUnitaria * detalle.MenuElegido.CostoPorAdulto;
-                total += detalle.CantidadDeMenusConExcepciones * detalle.MenuElegido.CostoPorAdulto;
+                throw new InvalidOperationException("No se puede calcular el costo total del presupuesto porque faltan datos.");
             }
 
-            foreach (var servicio in serviciosAdicionales)
+            if (SalonDelEvento != null && Evento != null && Menues != null && ServiciosAdicionales != null) // Verificar si todos los datos necesarios están presentes
             {
-                total += servicio.CostoDelServicio;
+                decimal total = salonDelEvento.CostoBase;
+                total *= evento.Duracion;
+                foreach (var detalle in menues)
+                {
+                    total += detalle.CantidadDeMenusUnitaria * detalle.MenuElegido.CostoPorAdulto;
+                    total += detalle.CantidadDeMenusConExcepciones * detalle.MenuElegido.CostoPorAdulto;
+                }
+                foreach (var servicio in serviciosAdicionales)
+                {
+                    total += servicio.CostoDelServicio;
+                }
+                return total;
             }
-
-            return total;
+            else
+            {
+                throw new InvalidOperationException("No se puede calcular el costo total del presupuesto porque faltan datos o no existen los valores enviados");
+            }
         }
     }
 }

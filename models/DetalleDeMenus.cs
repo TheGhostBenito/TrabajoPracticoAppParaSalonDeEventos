@@ -11,58 +11,39 @@ namespace proyecto_integrador.models
     {
         private int cantidadDeMenusUnitaria;
         private int cantidadDeMenusConExcepciones;
-        private TipoDeExclusionDeMenu exclusionDelMenu;
-        private Evento evento;
-        private MenuRepository menuElegido;
-
-        public DetalleDeMenus(int _cantidadUnitaria, int _cantidadConExcepciones, TipoDeExclusionDeMenu _exclusion, Evento _evento, MenuRepository _menu)
-        {
-            cantidadDeMenusUnitaria = _cantidadUnitaria;
-            cantidadDeMenusConExcepciones = _cantidadConExcepciones;
-            exclusionDelMenu = _exclusion;
-            evento = _evento;
-            menuElegido = _menu;
-        }
 
         public int CantidadDeMenusUnitaria
         {
+            get => cantidadDeMenusUnitaria;
             set
             {
-                if (value < 0)
-                {
-                    throw new ArgumentException("La cantidad de menús unitarios no puede ser negativa.");
-                }
+                if (value < 0) throw new ArgumentException("La cantidad no puede ser negativa.");
                 cantidadDeMenusUnitaria = value;
             }
-            get { return cantidadDeMenusUnitaria; }
         }
 
         public int CantidadDeMenusConExcepciones
         {
+            get => cantidadDeMenusConExcepciones;
             set
             {
-                if (value < 0)
-                {
-                    throw new ArgumentException("La cantidad de menús con excepciones no puede ser negativa.");
-                }
+                if (value < 0) throw new ArgumentException("La cantidad no puede ser negativa.");
                 cantidadDeMenusConExcepciones = value;
             }
-            get { return cantidadDeMenusConExcepciones; }
         }
 
-        public TipoDeExclusionDeMenu ExclusionDelMenu
-        { 
-            get { return exclusionDelMenu; }
-        }
+        
+        
+        
+        public TipoDeExclusionDeMenu ExclusionDelMenu { get; set; }
+        public MenuDeComida MenuElegido { get; set; }
 
-        public Evento Event
+        public DetalleDeMenus(int cantidadUnitaria, int cantidadConExcepciones, TipoDeExclusionDeMenu exclusion, MenuDeComida menu) //constructor de la clase DetalleDeMenus refactorizado para usar propiedades en lugar de campos privados
         {
-            get { return evento; }
-        }
-
-        public MenuRepository MenuElegido
-        {
-            get { return menuElegido; }
+            CantidadDeMenusUnitaria = cantidadUnitaria;
+            CantidadDeMenusConExcepciones = cantidadConExcepciones;
+            ExclusionDelMenu = exclusion;
+            MenuElegido = menu;
         }
     }
 }
