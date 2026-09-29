@@ -33,7 +33,7 @@ namespace proyecto_integrador.models
                 throw new InvalidOperationException("No se puede calcular el costo total del presupuesto porque faltan datos.");
             }
 
-            if (SalonDelEvento != null && Evento != null && Menues != null && ServiciosAdicionales != null) // Verificar si todos los datos necesarios están presentes
+            if (SalonDelEvento != null && Evento != null && Menues != null && ServiciosAdicionales != null) // Verificar si todos los datos necesarios son distintos que nulo
             {
                 decimal total = salonDelEvento.CostoBase;
                 total *= evento.Duracion;
@@ -48,7 +48,7 @@ namespace proyecto_integrador.models
                 }
                 return total;
             }
-            else
+            else // Si alguno de los datos necesarios es nulo, lanzar una excepción
             {
                 throw new InvalidOperationException("No se puede calcular el costo total del presupuesto porque faltan datos o no existen los valores enviados");
             }
