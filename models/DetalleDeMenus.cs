@@ -32,11 +32,13 @@ namespace proyecto_integrador.models
             }
         }
 
-        
-        
-        
-        public TipoDeExclusionDeMenu ExclusionDelMenu { get; set; }
-        public MenuDeComida MenuElegido { get; set; }
+
+
+
+        public TipoDeExclusionDeMenu ExclusionDelMenu;
+        public MenuDeComida MenuElegido;
+
+       
 
         public DetalleDeMenus(int cantidadUnitaria, int cantidadConExcepciones, TipoDeExclusionDeMenu exclusion, MenuDeComida menu) //constructor de la clase DetalleDeMenus refactorizado para usar propiedades en lugar de campos privados
         {
