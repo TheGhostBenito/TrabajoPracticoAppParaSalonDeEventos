@@ -9,14 +9,14 @@ namespace proyecto_integrador.models
 {
     public class Presupuesto
     {
-        private int id;
-        private DateTime fechaCreacionDePresupuesto;
-        private Evento evento;
-        private Salon salonDelEvento;
-        private List<DetalleDeMenus> menues;
-        private ServiciosAdicionalesRepository serviciosAdicionales;
+        private readonly int id;
+        private readonly DateTime fechaCreacionDePresupuesto;
+        private readonly Evento evento;
+        private readonly Salon salonDelEvento;
+        private readonly List<DetalleDeMenus> menues;
+        private readonly List<ServiciosAdicionales> serviciosAdicionales;
 
-        public Presupuesto(int _id, DateTime _fechaCreacion, Evento _evento, Salon _salon, List<DetalleDeMenus> _menues, ServiciosAdicionalesRepository _serviciosAdicionales)
+        public Presupuesto(int _id, DateTime _fechaCreacion, Evento _evento, Salon _salon, List<DetalleDeMenus> _menues, List<ServiciosAdicionales> _serviciosAdicionales)
         {
             id = _id;
             fechaCreacionDePresupuesto = _fechaCreacion;
@@ -33,7 +33,7 @@ namespace proyecto_integrador.models
                 throw new InvalidOperationException("No se puede calcular el costo total del presupuesto porque faltan datos.");
             }
 
-            if (SalonDelEvento != null && Evento != null && Menues != null && ServiciosAdicionales != null) // Verificar si todos los datos necesarios son distintos que nulo
+            if (salonDelEvento != null && evento != null && menues != null && serviciosAdicionales != null) // Verificar si todos los datos necesarios son distintos que nulo
             {
                 decimal total = salonDelEvento.CostoBase;
                 total *= evento.Duracion;
