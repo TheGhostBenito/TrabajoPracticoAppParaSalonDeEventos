@@ -16,5 +16,7 @@ namespace proyecto_integrador.pantallas
         {
             InitializeComponent();
         }
+
+
     }
 }

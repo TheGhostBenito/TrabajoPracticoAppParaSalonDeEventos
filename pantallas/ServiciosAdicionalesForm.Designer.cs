@@ -32,6 +32,7 @@
             this.dgvID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gdvDescripcion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvMonto = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvServiciosCreados)).BeginInit();
             this.SuspendLayout();
             // 
@@ -62,11 +63,21 @@
             this.dgvMonto.HeaderText = "Monto";
             this.dgvMonto.Name = "dgvMonto";
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Location = new System.Drawing.Point(27, 56);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(200, 100);
+            this.groupBox1.TabIndex = 1;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "groupBox1";
+            // 
             // ServiciosAdicionalesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(944, 501);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.dgvServiciosCreados);
             this.Name = "ServiciosAdicionalesForm";
             this.Text = "form";
@@ -81,5 +92,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dgvID;
         private System.Windows.Forms.DataGridViewTextBoxColumn gdvDescripcion;
         private System.Windows.Forms.DataGridViewTextBoxColumn dgvMonto;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }
