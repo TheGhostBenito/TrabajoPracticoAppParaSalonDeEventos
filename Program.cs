@@ -13,7 +13,7 @@ namespace proyecto_integrador
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new pantallas.SalonForm());
+            Application.Run(new Form1());
         }
     }
 }
