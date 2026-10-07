@@ -10,17 +10,33 @@ namespace proyecto_integrador.models
     {
         private int id;
         private string nombreDelSalon;
+        private string ubicacion;
         private decimal costoBase;
 
-
-
-        public Salon(int _id, string _nombreDelSalon, decimal _costoBase)
+        public Salon(int _id, string _nombreDelSalon, string _ubicacion, decimal _costoBase)
         {
             id = _id;
             nombreDelSalon = _nombreDelSalon;
+            ubicacion = _ubicacion;
             costoBase = _costoBase;
         }
 
+        public int Id
+        {
+            get { return id; }
+        }
+
+        public string Nombre
+        {
+            get { return nombreDelSalon; }
+            set { nombreDelSalon = value; }
+        }
+
+        public string Ubicacion
+        {
+            get { return ubicacion; }
+            set { ubicacion = value; }
+        }
 
         public decimal CostoBase  //getter y setter del costo base del salon
         {
@@ -33,9 +49,7 @@ namespace proyecto_integrador.models
                 costoBase = value;
             }
 
-
             get { return costoBase; }
         }
-
     }
 }

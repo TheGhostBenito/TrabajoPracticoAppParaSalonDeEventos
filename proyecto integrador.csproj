@@ -59,6 +59,12 @@
     <Compile Include="models\Salon.cs" />
     <Compile Include="models\Presupuesto.cs" />
     <Compile Include="models\TipoDeExclusionDeMenu.cs" />
+    <Compile Include="pantallas\SalonForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="pantallas\SalonForm.Designer.cs">
+      <DependentUpon>SalonForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="pantallas\ServiciosAdicionalesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -70,6 +76,9 @@
     <Compile Include="repository\MenuRepository.cs" />
     <Compile Include="repository\SalonRepository.cs" />
     <Compile Include="repository\ServiciosAdicionalesRepository.cs" />
+    <EmbeddedResource Include="pantallas\SalonForm.resx">
+      <DependentUpon>SalonForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="pantallas\ServiciosAdicionalesForm.resx">
       <DependentUpon>ServiciosAdicionalesForm.cs</DependentUpon>
     </EmbeddedResource>

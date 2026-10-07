@@ -28,7 +28,7 @@ namespace proyecto_integrador.models
 
         public decimal CalcularCostoTotal()
         {
-            if(salonDelEvento == null || evento == null || menues == null || serviciosAdicionales == null) // Verificar si alguno de los datos necesarios es nulo
+            if (salonDelEvento == null || evento == null || menues == null || serviciosAdicionales == null) // Verificar si alguno de los datos necesarios es nulo
             {
                 throw new InvalidOperationException("No se puede calcular el costo total del presupuesto porque faltan datos.");
             }
