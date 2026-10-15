@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using proyecto_integrador.models;
-using proyecto_integrador.repository;
+using proyecto_integrador.service;
 
 namespace proyecto_integrador.pantallas
 {
@@ -18,22 +11,21 @@ namespace proyecto_integrador.pantallas
         public SalonForm()
         {
             InitializeComponent();
-            dgvSalonesCreados.AutoGenerateColumns = false;
+            dgvSalonesCreados.AutoGenerateColumns = false; // Usamos las columnas que ya están definidas en el diseñador
             CargarGrilla();
 
-            // al abrir la pantalla, que no quede ninguna fila seleccionad
+            // Al abrir la pantalla, que no quede ninguna fila seleccionada
             this.Shown += delegate { dgvSalonesCreados.ClearSelection(); };
         }
 
-        // ---------- READ ----------
         private void CargarGrilla()
         {
             dgvSalonesCreados.DataSource = null;
-            dgvSalonesCreados.DataSource = SalonRepository.ObtenerSalones();
+            dgvSalonesCreados.DataSource = SalonService.ObtenerSalones();
             dgvSalonesCreados.ClearSelection();
         }
 
-        // Al hacer click se scargan los datos en los tex
+        // Al hacer clic en una fila, se cargan sus datos en los textbox
         private void dgvSalonesCreados_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0)
@@ -52,23 +44,26 @@ namespace proyecto_integrador.pantallas
             txtBoxMonto.Text = seleccionado.CostoBase.ToString("0.##", CultureInfo.CurrentCulture);
         }
 
-        // create
         private void btnCrearSalon_Click(object sender, EventArgs e)
         {
-            string nombre, ubicacion;
             decimal monto;
-
-            if (!ValidarCampos(out nombre, out ubicacion, out monto))
+            if (!TryObtenerMonto(out monto))
             {
                 return;
             }
 
-            SalonRepository.AgregarSalon(nombre, ubicacion, monto);
-            CargarGrilla();
-            LimpiarCampos();
+            try
+            {
+                SalonService.CrearSalon(txtBoxNombre.Text, txtBoxUbicacion.Text, monto);
+                CargarGrilla();
+                LimpiarCampos();
+            }
+            catch (ArgumentException ex)
+            {
+                MostrarError(ex.Message);
+            }
         }
 
-        // update
         private void btnModificarSalon_Click(object sender, EventArgs e)
         {
             Salon seleccionado = ObtenerSalonSeleccionado();
@@ -79,20 +74,24 @@ namespace proyecto_integrador.pantallas
                 return;
             }
 
-            string nombre, ubicacion;
             decimal monto;
-
-            if (!ValidarCampos(out nombre, out ubicacion, out monto))
+            if (!TryObtenerMonto(out monto))
             {
                 return;
             }
 
-            SalonRepository.ModificarSalon(seleccionado, nombre, ubicacion, monto);
-            CargarGrilla();
-            LimpiarCampos();
+            try
+            {
+                SalonService.ModificarSalon(seleccionado, txtBoxNombre.Text, txtBoxUbicacion.Text, monto);
+                CargarGrilla();
+                LimpiarCampos();
+            }
+            catch (ArgumentException ex)
+            {
+                MostrarError(ex.Message);
+            }
         }
 
-        // delete
         private void btnEliminarSalon_Click(object sender, EventArgs e)
         {
             Salon seleccionado = ObtenerSalonSeleccionado();
@@ -109,7 +108,7 @@ namespace proyecto_integrador.pantallas
 
             if (respuesta == DialogResult.Yes)
             {
-                SalonRepository.EliminarSalon(seleccionado);
+                SalonService.EliminarSalon(seleccionado);
                 CargarGrilla();
                 LimpiarCampos();
             }
@@ -120,7 +119,6 @@ namespace proyecto_integrador.pantallas
             LimpiarCampos();
         }
 
-        //auxiliates
         private Salon ObtenerSalonSeleccionado()
         {
             if (dgvSalonesCreados.SelectedRows.Count == 0)
@@ -130,38 +128,21 @@ namespace proyecto_integrador.pantallas
             return dgvSalonesCreados.SelectedRows[0].DataBoundItem as Salon;
         }
 
-        private bool ValidarCampos(out string nombre, out string ubicacion, out decimal monto)
+        // Convierte el texto del monto a número. Eso es de la pantalla; las reglas (>= 0, etc.) las valida el service
+        private bool TryObtenerMonto(out decimal monto)
         {
-            nombre = txtBoxNombre.Text.Trim();
-            ubicacion = txtBoxUbicacion.Text.Trim();
-            monto = 0;
-
-            if (nombre.Length == 0)
+            if (!decimal.TryParse(txtBoxMonto.Text.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out monto))
             {
-                MostrarError("Ingresá el nombre del salón.", txtBoxNombre);
+                MostrarError("El monto tiene que ser un número.");
+                txtBoxMonto.Focus();
                 return false;
             }
-
-            if (ubicacion.Length == 0)
-            {
-                MostrarError("Ingresá la ubicación del salón.", txtBoxUbicacion);
-                return false;
-            }
-
-            if (!decimal.TryParse(txtBoxMonto.Text.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out monto)
-                || monto < 0)
-            {
-                MostrarError("El monto tiene que ser un número mayor o igual a 0.", txtBoxMonto);
-                return false;
-            }
-
             return true;
         }
 
-        private void MostrarError(string mensaje, Control campo)
+        private void MostrarError(string mensaje)
         {
-            MessageBox.Show(mensaje, "Datos incompletos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            campo.Focus();
+            MessageBox.Show(mensaje, "Datos incorrectos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void LimpiarCampos()

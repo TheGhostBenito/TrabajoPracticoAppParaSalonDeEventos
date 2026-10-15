@@ -76,6 +76,7 @@
     <Compile Include="repository\MenuRepository.cs" />
     <Compile Include="repository\SalonRepository.cs" />
     <Compile Include="repository\ServiciosAdicionalesRepository.cs" />
+    <Compile Include="Service\SalonService.cs" />
     <EmbeddedResource Include="pantallas\SalonForm.resx">
       <DependentUpon>SalonForm.cs</DependentUpon>
     </EmbeddedResource>
