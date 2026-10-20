@@ -10,15 +10,45 @@ namespace proyecto_integrador.repository
 {
     public static class ServiciosAdicionalesRepository
     {
-        public static List<ServiciosAdicionales> ObtenerServiciosAdicionales() // Método que devuelve una lista de servicios adicionales con .ObtenerServiciosAdicionales()
+        private static List<ServiciosAdicionales> _servicios = new List<ServiciosAdicionales>
         {
-            List<ServiciosAdicionales> serviciosAdicionales = new List<ServiciosAdicionales>
+            new ServiciosAdicionales(1, "Servicio A", 20.00m),
+            new ServiciosAdicionales(2, "Servicio B", 30.00m),
+            new ServiciosAdicionales(3, "Servicio C", 40.00m)
+        };
+
+        public static List<ServiciosAdicionales> ObtenerServiciosAdicionales()
+        {
+            return _servicios.ToList();
+        }
+
+        public static void CrearServicio(ServiciosAdicionales servicio)
+        {
+            servicio.Id = _servicios.Any() ? _servicios.Max(s => s.Id) + 1 : 1;
+            _servicios.Add(servicio);
+        }
+
+        public static bool EliminarServicio(int id)
+        {
+            var servicio = _servicios.FirstOrDefault(s => s.Id == id);
+            if (servicio != null)
             {
-                new ServiciosAdicionales(1, "Servicio A", 20.00m),
-                new ServiciosAdicionales(2, "Servicio B", 30.00m),
-                new ServiciosAdicionales(3, "Servicio C", 40.00m)
-            };
-            return serviciosAdicionales;
+                _servicios.Remove(servicio);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool ModificarServicio(ServiciosAdicionales servicio)
+        {
+            var existente = _servicios.FirstOrDefault(s => s.Id == servicio.Id);
+            if (existente != null)
+            {
+                existente.Descripcion = servicio.Descripcion;
+                existente.Monto = servicio.Monto;
+                return true;
+            }
+            return false;
         }
     }
 }
