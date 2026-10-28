@@ -33,13 +33,13 @@
             this.gdvDescripcion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvMonto = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gBoxServiciosAdicionales = new System.Windows.Forms.GroupBox();
+            this.btnModificarServicio = new System.Windows.Forms.Button();
+            this.btnEliminarServicio = new System.Windows.Forms.Button();
             this.btnCrearServicio = new System.Windows.Forms.Button();
             this.lblMontoServicios = new System.Windows.Forms.Label();
             this.txtBoxMonto = new System.Windows.Forms.TextBox();
             this.descripcionServiciosAdicionales = new System.Windows.Forms.Label();
             this.txtBoxDescripcion = new System.Windows.Forms.TextBox();
-            this.btnEliminarServicio = new System.Windows.Forms.Button();
-            this.btnModificarServicio = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvServiciosCreados)).BeginInit();
             this.gBoxServiciosAdicionales.SuspendLayout();
             this.SuspendLayout();
@@ -86,6 +86,26 @@
             this.gBoxServiciosAdicionales.TabIndex = 1;
             this.gBoxServiciosAdicionales.TabStop = false;
             // 
+            // btnModificarServicio
+            // 
+            this.btnModificarServicio.Location = new System.Drawing.Point(129, 149);
+            this.btnModificarServicio.Name = "btnModificarServicio";
+            this.btnModificarServicio.Size = new System.Drawing.Size(98, 33);
+            this.btnModificarServicio.TabIndex = 6;
+            this.btnModificarServicio.Text = "Modifiar Servicio";
+            this.btnModificarServicio.UseVisualStyleBackColor = true;
+            this.btnModificarServicio.Click += new System.EventHandler(this.btnModificarServicio_Click);
+            // 
+            // btnEliminarServicio
+            // 
+            this.btnEliminarServicio.Location = new System.Drawing.Point(23, 149);
+            this.btnEliminarServicio.Name = "btnEliminarServicio";
+            this.btnEliminarServicio.Size = new System.Drawing.Size(99, 33);
+            this.btnEliminarServicio.TabIndex = 5;
+            this.btnEliminarServicio.Text = "Eliminar Servicio";
+            this.btnEliminarServicio.UseVisualStyleBackColor = true;
+            this.btnEliminarServicio.Click += new System.EventHandler(this.btnEliminarServicio_Click);
+            // 
             // btnCrearServicio
             // 
             this.btnCrearServicio.Location = new System.Drawing.Point(128, 110);
@@ -94,6 +114,7 @@
             this.btnCrearServicio.TabIndex = 4;
             this.btnCrearServicio.Text = "Crear Servicio";
             this.btnCrearServicio.UseVisualStyleBackColor = true;
+            this.btnCrearServicio.Click += new System.EventHandler(this.btnCrearServicio_Click);
             // 
             // lblMontoServicios
             // 
@@ -126,24 +147,6 @@
             this.txtBoxDescripcion.Name = "txtBoxDescripcion";
             this.txtBoxDescripcion.Size = new System.Drawing.Size(100, 20);
             this.txtBoxDescripcion.TabIndex = 0;
-            // 
-            // btnEliminarServicio
-            // 
-            this.btnEliminarServicio.Location = new System.Drawing.Point(23, 149);
-            this.btnEliminarServicio.Name = "btnEliminarServicio";
-            this.btnEliminarServicio.Size = new System.Drawing.Size(99, 33);
-            this.btnEliminarServicio.TabIndex = 5;
-            this.btnEliminarServicio.Text = "Eliminar Servicio";
-            this.btnEliminarServicio.UseVisualStyleBackColor = true;
-            // 
-            // btnModificarServicio
-            // 
-            this.btnModificarServicio.Location = new System.Drawing.Point(129, 149);
-            this.btnModificarServicio.Name = "btnModificarServicio";
-            this.btnModificarServicio.Size = new System.Drawing.Size(98, 33);
-            this.btnModificarServicio.TabIndex = 6;
-            this.btnModificarServicio.Text = "Modifiar Servicio";
-            this.btnModificarServicio.UseVisualStyleBackColor = true;
             // 
             // ServiciosAdicionalesForm
             // 

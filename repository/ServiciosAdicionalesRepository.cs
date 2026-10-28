@@ -8,27 +8,22 @@ using proyecto_integrador.models; // Llama y accede a la clase ServicioAdicional
 
 namespace proyecto_integrador.repository
 {
-    public static class ServiciosAdicionalesRepository
+    public class ServiciosAdicionalesRepository
     {
-        private static List<ServiciosAdicionales> _servicios = new List<ServiciosAdicionales>
-        {
-            new ServiciosAdicionales(1, "Servicio A", 20.00m),
-            new ServiciosAdicionales(2, "Servicio B", 30.00m),
-            new ServiciosAdicionales(3, "Servicio C", 40.00m)
-        };
+        private readonly List<ServiciosAdicionales> _servicios = new List<ServiciosAdicionales>();
 
-        public static List<ServiciosAdicionales> ObtenerServiciosAdicionales()
+        public List<ServiciosAdicionales> ObtenerTodos()
         {
             return _servicios.ToList();
         }
 
-        public static void CrearServicio(ServiciosAdicionales servicio)
+        public void Crear(ServiciosAdicionales servicio)
         {
             servicio.Id = _servicios.Any() ? _servicios.Max(s => s.Id) + 1 : 1;
             _servicios.Add(servicio);
         }
 
-        public static bool EliminarServicio(int id)
+        public bool Eliminar(int id)
         {
             var servicio = _servicios.FirstOrDefault(s => s.Id == id);
             if (servicio != null)
@@ -39,13 +34,13 @@ namespace proyecto_integrador.repository
             return false;
         }
 
-        public static bool ModificarServicio(ServiciosAdicionales servicio)
+        public bool Modificar(ServiciosAdicionales servicio)
         {
             var existente = _servicios.FirstOrDefault(s => s.Id == servicio.Id);
             if (existente != null)
             {
                 existente.Descripcion = servicio.Descripcion;
-                existente.Monto = servicio.Monto;
+                existente.CostoDelServicio = servicio.CostoDelServicio;
                 return true;
             }
             return false;

@@ -29,5 +29,16 @@ namespace proyecto_integrador.models
             }
             get { return montoFijo; }
         }
+        public string Descripcion
+        {
+            set { descripcion = value; }
+            get { return descripcion; }
+        }
+        
+        public int Id
+        {
+            set { id = value; }
+            get { return id; }
+        }
     }
 }
