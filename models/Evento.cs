@@ -1,66 +1,63 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace proyecto_integrador.models
 {
     public class Evento
     {
-        private int id;
-        private int DuracionDelEventoEnHoras;
-        private int CantidadDeAdultosQueAsisten;
-        private int CantidadDeNiñosQueAsisten;
+        private int _duracionDelEventoEnHoras;
+        private int _cantidadDeAdultos;
+        private int _cantidadDeNinos;
 
-        public Evento(int _id, int _duracion, int _cantidadAdultos, int _cantidadNinos)
+        public int Id { get; private set; }
+
+        public Evento(int id, int duracion, int cantidadAdultos, int cantidadNinos)
         {
-            id = _id;
-            DuracionDelEventoEnHoras = _duracion;
-            CantidadDeAdultosQueAsisten = _cantidadAdultos;
-            CantidadDeNiñosQueAsisten = _cantidadNinos;
+            Id = id;
+            Duracion = duracion;
+            CantidadAdultos = cantidadAdultos;
+            CantidadNinos = cantidadNinos;
         }
 
         public int Duracion
         {
+            get { return _duracionDelEventoEnHoras; }
             set
             {
-                if (value < 0)
+                if (value <= 0)
                 {
-                    throw new ArgumentException("La duración del evento no puede ser negativa.");
+                    throw new ArgumentException("La duración del evento tiene que ser mayor que cero.");
                 }
-                DuracionDelEventoEnHoras = value;
-            }
 
-            get { return DuracionDelEventoEnHoras; }
+                _duracionDelEventoEnHoras = value;
+            }
         }
 
         public int CantidadAdultos
         {
+            get { return _cantidadDeAdultos; }
             set
             {
                 if (value < 0)
                 {
                     throw new ArgumentException("La cantidad de adultos no puede ser negativa.");
                 }
-                CantidadDeAdultosQueAsisten = value;
-            }
 
-            get { return CantidadDeAdultosQueAsisten; }
+                _cantidadDeAdultos = value;
+            }
         }
 
         public int CantidadNinos
         {
+            get { return _cantidadDeNinos; }
             set
             {
                 if (value < 0)
                 {
                     throw new ArgumentException("La cantidad de niños no puede ser negativa.");
                 }
-                CantidadDeNiñosQueAsisten = value;
-            }
-            get { return CantidadDeNiñosQueAsisten; }
 
+                _cantidadDeNinos = value;
+            }
         }
     }
 }

@@ -52,6 +52,18 @@
     <Compile Include="pantallas\MenuDeComidaForm.Designer.cs">
       <DependentUpon>MenuDeComidaForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="pantallas\PresupuestoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="pantallas\PresupuestoForm.Designer.cs">
+      <DependentUpon>PresupuestoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="pantallas\PresupuestosForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="pantallas\PresupuestosForm.Designer.cs">
+      <DependentUpon>PresupuestosForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="pantallas\SolapaIzquierdaForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -65,6 +77,8 @@
     <Compile Include="models\Salon.cs" />
     <Compile Include="models\Presupuesto.cs" />
     <Compile Include="models\TipoDeExclusionDeMenu.cs" />
+    <Compile Include="dto\PresupuestoRequestDto.cs" />
+    <Compile Include="controller\PresupuestoController.cs" />
     <Compile Include="pantallas\SalonForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -80,9 +94,12 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="repository\MenuRepository.cs" />
+    <Compile Include="repository\PresupuestoRepository.cs" />
     <Compile Include="repository\SalonRepository.cs" />
     <Compile Include="repository\ServiciosAdicionalesRepository.cs" />
     <Compile Include="Service\MenuService.cs" />
+    <Compile Include="Service\PresupuestoPdfService.cs" />
+    <Compile Include="Service\PresupuestoService.cs" />
     <Compile Include="Service\SalonService.cs" />
     <Compile Include="Service\ServiciosAdicionalesService.cs" />
     <EmbeddedResource Include="pantallas\SalonForm.resx">
