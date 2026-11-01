@@ -46,28 +46,41 @@
             // 
             // dgvServiciosCreados
             // 
+            this.dgvServiciosCreados.AllowUserToAddRows = false;
+            this.dgvServiciosCreados.AllowUserToDeleteRows = false;
+            this.dgvServiciosCreados.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvServiciosCreados.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvServiciosCreados.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dgvID,
             this.gdvDescripcion,
             this.dgvMonto});
-            this.dgvServiciosCreados.Location = new System.Drawing.Point(518, 56);
+            this.dgvServiciosCreados.Location = new System.Drawing.Point(360, 56);
+            this.dgvServiciosCreados.MultiSelect = false;
             this.dgvServiciosCreados.Name = "dgvServiciosCreados";
-            this.dgvServiciosCreados.Size = new System.Drawing.Size(414, 433);
+            this.dgvServiciosCreados.ReadOnly = true;
+            this.dgvServiciosCreados.RowHeadersVisible = false;
+            this.dgvServiciosCreados.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvServiciosCreados.Size = new System.Drawing.Size(560, 520);
             this.dgvServiciosCreados.TabIndex = 0;
+            this.dgvServiciosCreados.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvServiciosCreados_CellClick);
             // 
             // dgvID
             // 
+            this.dgvID.DataPropertyName = "Id";
             this.dgvID.HeaderText = "ID";
             this.dgvID.Name = "dgvID";
             // 
             // gdvDescripcion
             // 
+            this.gdvDescripcion.DataPropertyName = "Descripcion";
             this.gdvDescripcion.HeaderText = "Descripcion";
             this.gdvDescripcion.Name = "gdvDescripcion";
             // 
             // dgvMonto
             // 
+            this.dgvMonto.DataPropertyName = "CostoDelServicio";
             this.dgvMonto.HeaderText = "Monto";
             this.dgvMonto.Name = "dgvMonto";
             // 
@@ -152,7 +165,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(944, 501);
+            this.ClientSize = new System.Drawing.Size(944, 620);
             this.Controls.Add(this.gBoxServiciosAdicionales);
             this.Controls.Add(this.dgvServiciosCreados);
             this.Name = "ServiciosAdicionalesForm";

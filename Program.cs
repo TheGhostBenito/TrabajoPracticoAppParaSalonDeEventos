@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using proyecto_integrador.pantallas;
 
 namespace proyecto_integrador
 {
@@ -13,7 +14,7 @@ namespace proyecto_integrador
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new SolapaIzquierdaForm());
         }
     }
 }

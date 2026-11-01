@@ -1,68 +1,158 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
+using System.Globalization;
 using System.Windows.Forms;
-using proyecto_integrador.repository; // Llama y accede a la clase ServiciosAdicionalesRepository. Que se encuentra dentro de repository
-using proyecto_integrador.models; // Llama y accede a la clase ServiciosAdicionales. Que se encuentra dentro de model
+using proyecto_integrador.Service;
+using proyecto_integrador.models;
+using proyecto_integrador.repository;
 
 namespace proyecto_integrador.pantallas
 {
     public partial class ServiciosAdicionalesForm : Form
     {
+        private readonly ServiciosAdicionalesService servicio;
+
         public ServiciosAdicionalesForm()
         {
             InitializeComponent();
+            servicio = new ServiciosAdicionalesService(ServiciosAdicionalesRepository.Instance);
+            dgvServiciosCreados.AutoGenerateColumns = false;
             CargarServicios();
         }
 
         private void CargarServicios()
         {
-            var servicios = new ServiciosAdicionalesRepository().ObtenerTodos();
-            dgvServiciosCreados.DataSource = servicios;
+            dgvServiciosCreados.DataSource = null;
+            dgvServiciosCreados.DataSource = servicio.ObtenerTodos();
+            dgvServiciosCreados.ClearSelection();
+        }
+
+        private void dgvServiciosCreados_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
+            ServiciosAdicionales seleccionado = dgvServiciosCreados.Rows[e.RowIndex].DataBoundItem as ServiciosAdicionales;
+            if (seleccionado == null)
+            {
+                return;
+            }
+
+            txtBoxDescripcion.Text = seleccionado.Descripcion;
+            txtBoxMonto.Text = seleccionado.CostoDelServicio.ToString("0.##", CultureInfo.CurrentCulture);
         }
 
         private void btnCrearServicio_Click(object sender, EventArgs e)
         {
-            string descripcion = txtBoxDescripcion.Text;
-            decimal monto = decimal.Parse(txtBoxMonto.Text);
+            decimal monto;
+            if (!TryObtenerMonto(out monto))
+            {
+                return;
+            }
 
-            var nuevoServicio = new models.ServiciosAdicionales(0, descripcion, monto);
-            new ServiciosAdicionalesRepository().Crear(nuevoServicio);
-
-            CargarServicios();
+            try
+            {
+                servicio.Crear(txtBoxDescripcion.Text, monto);
+                CargarServicios();
+                LimpiarCampos();
+            }
+            catch (ArgumentException ex)
+            {
+                MostrarError(ex.Message);
+            }
         }
 
         private void btnEliminarServicio_Click(object sender, EventArgs e)
         {
-            if (dgvServiciosCreados.CurrentRow != null)
+            ServiciosAdicionales seleccionado = ObtenerServicioSeleccionado();
+            if (seleccionado == null)
             {
-                int id = (int)dgvServiciosCreados.SelectedRows[0].Cells["dgvID"].Value;
-                new ServiciosAdicionalesRepository().Eliminar(id);
+                MessageBox.Show("Seleccioná un servicio de la lista para eliminarlo.", "Atención",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
+            DialogResult respuesta = MessageBox.Show(
+                "¿Seguro que querés eliminar el servicio \"" + seleccionado.Descripcion + "\"?",
+                "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (respuesta == DialogResult.Yes)
+            {
+                servicio.Eliminar(seleccionado.Id);
                 CargarServicios();
+                LimpiarCampos();
             }
         }
 
         private void btnModificarServicio_Click(object sender, EventArgs e)
         {
-            if (dgvServiciosCreados.CurrentRow != null)
+            ServiciosAdicionales seleccionado = ObtenerServicioSeleccionado();
+            if (seleccionado == null)
             {
-                int id = (int)dgvServiciosCreados.SelectedRows[0].Cells["dgvID"].Value;
-                string descripcion = txtBoxDescripcion.Text;
-                decimal monto = decimal.Parse(txtBoxMonto.Text);
+                MessageBox.Show("Seleccioná un servicio de la lista para modificarlo.", "Atención",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
+            decimal monto;
+            if (!TryObtenerMonto(out monto))
+            {
+                return;
+            }
 
-                var servicioModificado = new models.ServiciosAdicionales(id, descripcion, monto);
-                new ServiciosAdicionalesRepository().Modificar(servicioModificado);
-
+            try
+            {
+                bool modificado = servicio.Modificar(seleccionado.Id, txtBoxDescripcion.Text, monto);
+                if (!modificado)
+                {
+                    MessageBox.Show("No se encontró el servicio seleccionado.", "Atención",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
 
                 CargarServicios();
+                LimpiarCampos();
             }
+            catch (ArgumentException ex)
+            {
+                MostrarError(ex.Message);
+            }
+        }
+
+        private ServiciosAdicionales ObtenerServicioSeleccionado()
+        {
+            if (dgvServiciosCreados.CurrentRow == null)
+            {
+                return null;
+            }
+
+            return dgvServiciosCreados.CurrentRow.DataBoundItem as ServiciosAdicionales;
+        }
+
+        private bool TryObtenerMonto(out decimal monto)
+        {
+            if (!decimal.TryParse(txtBoxMonto.Text.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out monto))
+            {
+                MostrarError("El monto tiene que ser un número.");
+                txtBoxMonto.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        private void MostrarError(string mensaje)
+        {
+            MessageBox.Show(mensaje, "Datos incorrectos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        private void LimpiarCampos()
+        {
+            txtBoxDescripcion.Clear();
+            txtBoxMonto.Clear();
+            dgvServiciosCreados.ClearSelection();
+            txtBoxDescripcion.Focus();
         }
     }
 }

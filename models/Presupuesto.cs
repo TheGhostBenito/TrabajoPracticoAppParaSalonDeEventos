@@ -37,12 +37,12 @@ namespace proyecto_integrador.models
             {
                 decimal total = salonDelEvento.CostoBase;
                 total *= evento.Duracion;
-                foreach (var detalle in menues)
+                foreach (DetalleDeMenus detalle in menues)
                 {
                     total += detalle.CantidadDeMenusUnitaria * detalle.MenuElegido.CostoPorAdulto;
                     total += detalle.CantidadDeMenusConExcepciones * detalle.MenuElegido.CostoPorAdulto;
                 }
-                foreach (var servicio in serviciosAdicionales)
+                foreach (ServiciosAdicionales servicio in serviciosAdicionales)
                 {
                     total += servicio.CostoDelServicio;
                 }

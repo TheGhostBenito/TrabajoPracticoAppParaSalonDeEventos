@@ -8,9 +8,19 @@ using proyecto_integrador.models; // Llama y accede a la clase ServicioAdicional
 
 namespace proyecto_integrador.repository
 {
-    public class ServiciosAdicionalesRepository
+    public sealed class ServiciosAdicionalesRepository
     {
+        private static readonly ServiciosAdicionalesRepository instancia = new ServiciosAdicionalesRepository();
         private readonly List<ServiciosAdicionales> _servicios = new List<ServiciosAdicionales>();
+
+        private ServiciosAdicionalesRepository()
+        {
+        }
+
+        public static ServiciosAdicionalesRepository Instance
+        {
+            get { return instancia; }
+        }
 
         public List<ServiciosAdicionales> ObtenerTodos()
         {
@@ -25,7 +35,7 @@ namespace proyecto_integrador.repository
 
         public bool Eliminar(int id)
         {
-            var servicio = _servicios.FirstOrDefault(s => s.Id == id);
+            ServiciosAdicionales servicio = _servicios.FirstOrDefault(s => s.Id == id);
             if (servicio != null)
             {
                 _servicios.Remove(servicio);
@@ -36,7 +46,7 @@ namespace proyecto_integrador.repository
 
         public bool Modificar(ServiciosAdicionales servicio)
         {
-            var existente = _servicios.FirstOrDefault(s => s.Id == servicio.Id);
+            ServiciosAdicionales existente = _servicios.FirstOrDefault(s => s.Id == servicio.Id);
             if (existente != null)
             {
                 existente.Descripcion = servicio.Descripcion;
