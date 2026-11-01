@@ -10,6 +10,7 @@ namespace proyecto_integrador.pantallas
         private Panel pantallaInicio;
         private Panel pantallaMenu;
         private SalonForm formularioSalon;
+        private MenuDeComidaForm formularioMenu;
         private ServiciosAdicionalesForm formularioServiciosAdicionales;
         private Button botonSeccionActiva;
 
@@ -114,7 +115,12 @@ namespace proyecto_integrador.pantallas
 
         private void btnMenu_Click(object sender, EventArgs e)
         {
-            MostrarPantalla(pantallaMenu, btnMenu, "Menú", "Opciones de menú y valores por invitado.");
+            if (formularioMenu == null || formularioMenu.IsDisposed)
+            {
+                formularioMenu = PrepararFormularioHijo(new MenuDeComidaForm());
+            }
+
+            MostrarPantalla(formularioMenu, btnMenu, "Menú", "Opciones de menú y valores por invitado.");
         }
 
         private void btnServiciosAdicionales_Click(object sender, EventArgs e)

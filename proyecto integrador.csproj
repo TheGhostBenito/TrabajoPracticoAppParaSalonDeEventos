@@ -46,6 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="pantallas\MenuDeComidaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="pantallas\MenuDeComidaForm.Designer.cs">
+      <DependentUpon>MenuDeComidaForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="pantallas\SolapaIzquierdaForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +82,7 @@
     <Compile Include="repository\MenuRepository.cs" />
     <Compile Include="repository\SalonRepository.cs" />
     <Compile Include="repository\ServiciosAdicionalesRepository.cs" />
+    <Compile Include="Service\MenuService.cs" />
     <Compile Include="Service\SalonService.cs" />
     <Compile Include="Service\ServiciosAdicionalesService.cs" />
     <EmbeddedResource Include="pantallas\SalonForm.resx">
