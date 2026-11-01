@@ -8,17 +8,52 @@ using proyecto_integrador.models; // Llama y accede a la clase ServicioAdicional
 
 namespace proyecto_integrador.repository
 {
-    public static class ServiciosAdicionalesRepository
+    public sealed class ServiciosAdicionalesRepository
     {
-        public static List<ServiciosAdicionales> ObtenerServiciosAdicionales() // Método que devuelve una lista de servicios adicionales con .ObtenerServiciosAdicionales()
+        private static readonly ServiciosAdicionalesRepository instancia = new ServiciosAdicionalesRepository();
+        private readonly List<ServiciosAdicionales> _servicios = new List<ServiciosAdicionales>();
+
+        private ServiciosAdicionalesRepository()
         {
-            List<ServiciosAdicionales> serviciosAdicionales = new List<ServiciosAdicionales>
+        }
+
+        public static ServiciosAdicionalesRepository Instance
+        {
+            get { return instancia; }
+        }
+
+        public List<ServiciosAdicionales> ObtenerTodos()
+        {
+            return _servicios.ToList();
+        }
+
+        public void Crear(ServiciosAdicionales servicio)
+        {
+            servicio.Id = _servicios.Any() ? _servicios.Max(s => s.Id) + 1 : 1;
+            _servicios.Add(servicio);
+        }
+
+        public bool Eliminar(int id)
+        {
+            ServiciosAdicionales servicio = _servicios.FirstOrDefault(s => s.Id == id);
+            if (servicio != null)
             {
-                new ServiciosAdicionales(1, "Servicio A", 20.00m),
-                new ServiciosAdicionales(2, "Servicio B", 30.00m),
-                new ServiciosAdicionales(3, "Servicio C", 40.00m)
-            };
-            return serviciosAdicionales;
+                _servicios.Remove(servicio);
+                return true;
+            }
+            return false;
+        }
+
+        public bool Modificar(ServiciosAdicionales servicio)
+        {
+            ServiciosAdicionales existente = _servicios.FirstOrDefault(s => s.Id == servicio.Id);
+            if (existente != null)
+            {
+                existente.Descripcion = servicio.Descripcion;
+                existente.CostoDelServicio = servicio.CostoDelServicio;
+                return true;
+            }
+            return false;
         }
     }
 }

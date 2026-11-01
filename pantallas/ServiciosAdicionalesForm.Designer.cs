@@ -33,44 +33,61 @@
             this.gdvDescripcion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvMonto = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gBoxServiciosAdicionales = new System.Windows.Forms.GroupBox();
-            this.txtBoxDescripcion = new System.Windows.Forms.TextBox();
-            this.descripcionServiciosAdicionales = new System.Windows.Forms.Label();
-            this.txtBoxMonto = new System.Windows.Forms.TextBox();
-            this.lblMontoServicios = new System.Windows.Forms.Label();
+            this.btnModificarServicio = new System.Windows.Forms.Button();
+            this.btnEliminarServicio = new System.Windows.Forms.Button();
             this.btnCrearServicio = new System.Windows.Forms.Button();
+            this.lblMontoServicios = new System.Windows.Forms.Label();
+            this.txtBoxMonto = new System.Windows.Forms.TextBox();
+            this.descripcionServiciosAdicionales = new System.Windows.Forms.Label();
+            this.txtBoxDescripcion = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvServiciosCreados)).BeginInit();
             this.gBoxServiciosAdicionales.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgvServiciosCreados
             // 
+            this.dgvServiciosCreados.AllowUserToAddRows = false;
+            this.dgvServiciosCreados.AllowUserToDeleteRows = false;
+            this.dgvServiciosCreados.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvServiciosCreados.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvServiciosCreados.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dgvID,
             this.gdvDescripcion,
             this.dgvMonto});
-            this.dgvServiciosCreados.Location = new System.Drawing.Point(518, 56);
+            this.dgvServiciosCreados.Location = new System.Drawing.Point(360, 56);
+            this.dgvServiciosCreados.MultiSelect = false;
             this.dgvServiciosCreados.Name = "dgvServiciosCreados";
-            this.dgvServiciosCreados.Size = new System.Drawing.Size(414, 433);
+            this.dgvServiciosCreados.ReadOnly = true;
+            this.dgvServiciosCreados.RowHeadersVisible = false;
+            this.dgvServiciosCreados.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvServiciosCreados.Size = new System.Drawing.Size(560, 520);
             this.dgvServiciosCreados.TabIndex = 0;
+            this.dgvServiciosCreados.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvServiciosCreados_CellClick);
             // 
             // dgvID
             // 
+            this.dgvID.DataPropertyName = "Id";
             this.dgvID.HeaderText = "ID";
             this.dgvID.Name = "dgvID";
             // 
             // gdvDescripcion
             // 
+            this.gdvDescripcion.DataPropertyName = "Descripcion";
             this.gdvDescripcion.HeaderText = "Descripcion";
             this.gdvDescripcion.Name = "gdvDescripcion";
             // 
             // dgvMonto
             // 
+            this.dgvMonto.DataPropertyName = "CostoDelServicio";
             this.dgvMonto.HeaderText = "Monto";
             this.dgvMonto.Name = "dgvMonto";
             // 
             // gBoxServiciosAdicionales
             // 
+            this.gBoxServiciosAdicionales.Controls.Add(this.btnModificarServicio);
+            this.gBoxServiciosAdicionales.Controls.Add(this.btnEliminarServicio);
             this.gBoxServiciosAdicionales.Controls.Add(this.btnCrearServicio);
             this.gBoxServiciosAdicionales.Controls.Add(this.lblMontoServicios);
             this.gBoxServiciosAdicionales.Controls.Add(this.txtBoxMonto);
@@ -82,28 +99,35 @@
             this.gBoxServiciosAdicionales.TabIndex = 1;
             this.gBoxServiciosAdicionales.TabStop = false;
             // 
-            // txtBoxDescripcion
+            // btnModificarServicio
             // 
-            this.txtBoxDescripcion.Location = new System.Drawing.Point(128, 19);
-            this.txtBoxDescripcion.Name = "txtBoxDescripcion";
-            this.txtBoxDescripcion.Size = new System.Drawing.Size(100, 20);
-            this.txtBoxDescripcion.TabIndex = 0;
+            this.btnModificarServicio.Location = new System.Drawing.Point(129, 149);
+            this.btnModificarServicio.Name = "btnModificarServicio";
+            this.btnModificarServicio.Size = new System.Drawing.Size(98, 33);
+            this.btnModificarServicio.TabIndex = 6;
+            this.btnModificarServicio.Text = "Modifiar Servicio";
+            this.btnModificarServicio.UseVisualStyleBackColor = true;
+            this.btnModificarServicio.Click += new System.EventHandler(this.btnModificarServicio_Click);
             // 
-            // descripcionServiciosAdicionales
+            // btnEliminarServicio
             // 
-            this.descripcionServiciosAdicionales.AutoSize = true;
-            this.descripcionServiciosAdicionales.Location = new System.Drawing.Point(20, 22);
-            this.descripcionServiciosAdicionales.Name = "descripcionServiciosAdicionales";
-            this.descripcionServiciosAdicionales.Size = new System.Drawing.Size(102, 13);
-            this.descripcionServiciosAdicionales.TabIndex = 1;
-            this.descripcionServiciosAdicionales.Text = "Ingrese descripcion:";
+            this.btnEliminarServicio.Location = new System.Drawing.Point(23, 149);
+            this.btnEliminarServicio.Name = "btnEliminarServicio";
+            this.btnEliminarServicio.Size = new System.Drawing.Size(99, 33);
+            this.btnEliminarServicio.TabIndex = 5;
+            this.btnEliminarServicio.Text = "Eliminar Servicio";
+            this.btnEliminarServicio.UseVisualStyleBackColor = true;
+            this.btnEliminarServicio.Click += new System.EventHandler(this.btnEliminarServicio_Click);
             // 
-            // txtBoxMonto
+            // btnCrearServicio
             // 
-            this.txtBoxMonto.Location = new System.Drawing.Point(128, 59);
-            this.txtBoxMonto.Name = "txtBoxMonto";
-            this.txtBoxMonto.Size = new System.Drawing.Size(100, 20);
-            this.txtBoxMonto.TabIndex = 2;
+            this.btnCrearServicio.Location = new System.Drawing.Point(128, 110);
+            this.btnCrearServicio.Name = "btnCrearServicio";
+            this.btnCrearServicio.Size = new System.Drawing.Size(99, 33);
+            this.btnCrearServicio.TabIndex = 4;
+            this.btnCrearServicio.Text = "Crear Servicio";
+            this.btnCrearServicio.UseVisualStyleBackColor = true;
+            this.btnCrearServicio.Click += new System.EventHandler(this.btnCrearServicio_Click);
             // 
             // lblMontoServicios
             // 
@@ -114,20 +138,34 @@
             this.lblMontoServicios.TabIndex = 3;
             this.lblMontoServicios.Text = "Ingrese monto:";
             // 
-            // btnCrearServicio
+            // txtBoxMonto
             // 
-            this.btnCrearServicio.Location = new System.Drawing.Point(128, 110);
-            this.btnCrearServicio.Name = "btnCrearServicio";
-            this.btnCrearServicio.Size = new System.Drawing.Size(99, 33);
-            this.btnCrearServicio.TabIndex = 4;
-            this.btnCrearServicio.Text = "Crear Servicio";
-            this.btnCrearServicio.UseVisualStyleBackColor = true;
+            this.txtBoxMonto.Location = new System.Drawing.Point(128, 59);
+            this.txtBoxMonto.Name = "txtBoxMonto";
+            this.txtBoxMonto.Size = new System.Drawing.Size(100, 20);
+            this.txtBoxMonto.TabIndex = 2;
+            // 
+            // descripcionServiciosAdicionales
+            // 
+            this.descripcionServiciosAdicionales.AutoSize = true;
+            this.descripcionServiciosAdicionales.Location = new System.Drawing.Point(20, 22);
+            this.descripcionServiciosAdicionales.Name = "descripcionServiciosAdicionales";
+            this.descripcionServiciosAdicionales.Size = new System.Drawing.Size(102, 13);
+            this.descripcionServiciosAdicionales.TabIndex = 1;
+            this.descripcionServiciosAdicionales.Text = "Ingrese descripcion:";
+            // 
+            // txtBoxDescripcion
+            // 
+            this.txtBoxDescripcion.Location = new System.Drawing.Point(128, 19);
+            this.txtBoxDescripcion.Name = "txtBoxDescripcion";
+            this.txtBoxDescripcion.Size = new System.Drawing.Size(100, 20);
+            this.txtBoxDescripcion.TabIndex = 0;
             // 
             // ServiciosAdicionalesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(944, 501);
+            this.ClientSize = new System.Drawing.Size(944, 620);
             this.Controls.Add(this.gBoxServiciosAdicionales);
             this.Controls.Add(this.dgvServiciosCreados);
             this.Name = "ServiciosAdicionalesForm";
@@ -151,5 +189,7 @@
         private System.Windows.Forms.TextBox txtBoxDescripcion;
         private System.Windows.Forms.Button btnCrearServicio;
         private System.Windows.Forms.Label lblMontoServicios;
+        private System.Windows.Forms.Button btnEliminarServicio;
+        private System.Windows.Forms.Button btnModificarServicio;
     }
 }
