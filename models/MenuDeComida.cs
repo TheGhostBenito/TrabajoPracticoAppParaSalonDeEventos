@@ -13,8 +13,6 @@ namespace proyecto_integrador.models
         private decimal costoPorAdulto;
         private decimal costoPorNiño;
 
-
-
         public MenuDeComida(int _id, string _nombre, decimal _costoPorAdulto, decimal _costoPorNiño)
         {
             id = _id;
@@ -23,7 +21,17 @@ namespace proyecto_integrador.models
             costoPorNiño = _costoPorNiño;
         }
 
+        public int Id
+        {
+            get { return id; }
+            set { id = value; }
+        }
 
+        public string Nombre
+        {
+            get { return nombre; }
+            set { nombre = value; }
+        }
 
         public decimal CostoPorAdulto
         {
@@ -40,7 +48,6 @@ namespace proyecto_integrador.models
         }
 
         public decimal CostoPorNiño
-
         {
             set
             {
@@ -50,7 +57,6 @@ namespace proyecto_integrador.models
                 }
                 costoPorNiño = value;
             }
-
 
             get { return costoPorNiño; }
         }
