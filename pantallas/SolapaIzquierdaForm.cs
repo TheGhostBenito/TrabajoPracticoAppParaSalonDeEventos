@@ -1,6 +1,8 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using proyecto_integrador.controller;
+using proyecto_integrador.models;
 using proyecto_integrador.pantallas;
 
 namespace proyecto_integrador.pantallas
@@ -8,20 +10,43 @@ namespace proyecto_integrador.pantallas
     public partial class SolapaIzquierdaForm : Form
     {
         private Panel pantallaInicio;
-        private Panel pantallaMenu;
         private SalonForm formularioSalon;
         private MenuDeComidaForm formularioMenu;
         private ServiciosAdicionalesForm formularioServiciosAdicionales;
+        private PresupuestoForm formularioPresupuesto;
+        private PresupuestosForm formularioPresupuestos;
+        private readonly PresupuestoController _presupuestoController;
+        private Button botonCancelarPresupuesto;
         private Button botonSeccionActiva;
 
         public SolapaIzquierdaForm()
         {
+            _presupuestoController = new PresupuestoController();
             InitializeComponent();
-            CrearPantallasPendientes();
+            CrearAccionCancelarPresupuesto();
+            CrearPantallaInicio();
             MostrarInicio();
         }
 
-        private void CrearPantallasPendientes()
+        private void CrearAccionCancelarPresupuesto()
+        {
+            botonCancelarPresupuesto = new Button();
+            botonCancelarPresupuesto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            botonCancelarPresupuesto.BackColor = Color.FromArgb(230, 234, 239);
+            botonCancelarPresupuesto.FlatAppearance.BorderSize = 0;
+            botonCancelarPresupuesto.FlatStyle = FlatStyle.Flat;
+            botonCancelarPresupuesto.Font = new Font("Segoe UI", 9F);
+            botonCancelarPresupuesto.ForeColor = Color.FromArgb(45, 55, 70);
+            botonCancelarPresupuesto.Location = new Point(panelEncabezado.ClientSize.Width - 210, 20);
+            botonCancelarPresupuesto.Size = new Size(185, 40);
+            botonCancelarPresupuesto.Text = "Cancelar presupuesto";
+            botonCancelarPresupuesto.UseVisualStyleBackColor = false;
+            botonCancelarPresupuesto.Visible = false;
+            botonCancelarPresupuesto.Click += botonCancelarPresupuesto_Click;
+            panelEncabezado.Controls.Add(botonCancelarPresupuesto);
+        }
+
+        private void CrearPantallaInicio()
         {
             pantallaInicio = new Panel();
             pantallaInicio.BackColor = Color.FromArgb(246, 248, 251);
@@ -30,23 +55,23 @@ namespace proyecto_integrador.pantallas
             Panel tarjetaInicio = new Panel();
             tarjetaInicio.BackColor = Color.White;
             tarjetaInicio.Location = new Point(28, 28);
-            tarjetaInicio.Size = new Size(650, 235);
-            tarjetaInicio.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            tarjetaInicio.Size = new Size(440, 245);
+            tarjetaInicio.Anchor = AnchorStyles.Top | AnchorStyles.Left;
 
             Label tituloInicio = new Label();
             tituloInicio.AutoSize = true;
             tituloInicio.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
             tituloInicio.ForeColor = Color.FromArgb(35, 45, 61);
             tituloInicio.Location = new Point(28, 27);
-            tituloInicio.Text = "Presupuestá tu próximo evento";
+            tituloInicio.Text = "Crear presupuesto";
 
             Label descripcionInicio = new Label();
             descripcionInicio.AutoSize = false;
             descripcionInicio.Font = new Font("Segoe UI", 10F);
             descripcionInicio.ForeColor = Color.FromArgb(104, 116, 132);
             descripcionInicio.Location = new Point(32, 78);
-            descripcionInicio.Size = new Size(560, 48);
-            descripcionInicio.Text = "Administrá salones y servicios desde el menú. La creación de presupuestos se incorporará en el siguiente paso.";
+            descripcionInicio.Size = new Size(380, 58);
+            descripcionInicio.Text = "Cargá los datos del cliente, el evento, sus menús y los servicios que quiera agregar.";
 
             Button botonCrearPresupuesto = new Button();
             botonCrearPresupuesto.BackColor = Color.FromArgb(48, 99, 157);
@@ -54,9 +79,9 @@ namespace proyecto_integrador.pantallas
             botonCrearPresupuesto.FlatStyle = FlatStyle.Flat;
             botonCrearPresupuesto.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             botonCrearPresupuesto.ForeColor = Color.White;
-            botonCrearPresupuesto.Location = new Point(32, 150);
+            botonCrearPresupuesto.Location = new Point(32, 165);
             botonCrearPresupuesto.Size = new Size(190, 42);
-            botonCrearPresupuesto.Text = "Crear presupuesto";
+            botonCrearPresupuesto.Text = "Nuevo presupuesto";
             botonCrearPresupuesto.UseVisualStyleBackColor = false;
             botonCrearPresupuesto.Click += botonCrearPresupuesto_Click;
 
@@ -65,37 +90,45 @@ namespace proyecto_integrador.pantallas
             tarjetaInicio.Controls.Add(botonCrearPresupuesto);
             pantallaInicio.Controls.Add(tarjetaInicio);
 
-            pantallaMenu = new Panel();
-            pantallaMenu.BackColor = Color.FromArgb(246, 248, 251);
-            pantallaMenu.Dock = DockStyle.Fill;
+            Panel tarjetaConsulta = new Panel();
+            tarjetaConsulta.BackColor = Color.White;
+            tarjetaConsulta.Location = new Point(490, 28);
+            tarjetaConsulta.Size = new Size(440, 245);
+            tarjetaConsulta.Anchor = AnchorStyles.Top | AnchorStyles.Left;
 
-            Panel tarjetaMenu = new Panel();
-            tarjetaMenu.BackColor = Color.White;
-            tarjetaMenu.Location = new Point(28, 28);
-            tarjetaMenu.Size = new Size(650, 190);
-            tarjetaMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            Label tituloConsulta = new Label();
+            tituloConsulta.AutoSize = true;
+            tituloConsulta.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            tituloConsulta.ForeColor = Color.FromArgb(35, 45, 61);
+            tituloConsulta.Location = new Point(28, 27);
+            tituloConsulta.Text = "Historial de presupuestos";
 
-            Label tituloMenu = new Label();
-            tituloMenu.AutoSize = true;
-            tituloMenu.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
-            tituloMenu.ForeColor = Color.FromArgb(35, 45, 61);
-            tituloMenu.Location = new Point(28, 25);
-            tituloMenu.Text = "Menús";
+            Label descripcionConsulta = new Label();
+            descripcionConsulta.AutoSize = false;
+            descripcionConsulta.Font = new Font("Segoe UI", 10F);
+            descripcionConsulta.ForeColor = Color.FromArgb(104, 116, 132);
+            descripcionConsulta.Location = new Point(32, 78);
+            descripcionConsulta.Size = new Size(380, 58);
+            descripcionConsulta.Text = "Consultá el detalle de cada presupuesto, abrí su PDF y modificá los datos cuando sea necesario.";
 
-            Label descripcionMenu = new Label();
-            descripcionMenu.AutoSize = false;
-            descripcionMenu.Font = new Font("Segoe UI", 10F);
-            descripcionMenu.ForeColor = Color.FromArgb(104, 116, 132);
-            descripcionMenu.Location = new Point(32, 72);
-            descripcionMenu.Size = new Size(560, 70);
-            descripcionMenu.Text = "Todavía no hay una pantalla de administración de menús. Por ahora, las opciones de ejemplo están definidas en el repositorio de menús.";
+            Button botonVerPresupuestos = new Button();
+            botonVerPresupuestos.BackColor = Color.FromArgb(229, 237, 247);
+            botonVerPresupuestos.FlatAppearance.BorderSize = 0;
+            botonVerPresupuestos.FlatStyle = FlatStyle.Flat;
+            botonVerPresupuestos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            botonVerPresupuestos.ForeColor = Color.FromArgb(48, 99, 157);
+            botonVerPresupuestos.Location = new Point(32, 165);
+            botonVerPresupuestos.Size = new Size(190, 42);
+            botonVerPresupuestos.Text = "Consultar historial";
+            botonVerPresupuestos.UseVisualStyleBackColor = false;
+            botonVerPresupuestos.Click += botonVerPresupuestos_Click;
 
-            tarjetaMenu.Controls.Add(tituloMenu);
-            tarjetaMenu.Controls.Add(descripcionMenu);
-            pantallaMenu.Controls.Add(tarjetaMenu);
+            tarjetaConsulta.Controls.Add(tituloConsulta);
+            tarjetaConsulta.Controls.Add(descripcionConsulta);
+            tarjetaConsulta.Controls.Add(botonVerPresupuestos);
+            pantallaInicio.Controls.Add(tarjetaConsulta);
 
             panelContenido.Controls.Add(pantallaInicio);
-            panelContenido.Controls.Add(pantallaMenu);
         }
 
         private void btnInicio_Click(object sender, EventArgs e)
@@ -163,6 +196,7 @@ namespace proyecto_integrador.pantallas
             pantalla.BringToFront();
             lblTituloSeccion.Text = titulo;
             lblDescripcionSeccion.Text = descripcion;
+            botonCancelarPresupuesto.Visible = formularioPresupuesto != null && pantalla == formularioPresupuesto;
             ActualizarBotonActivo(botonActivo);
         }
 
@@ -190,11 +224,69 @@ namespace proyecto_integrador.pantallas
 
         private void botonCrearPresupuesto_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(
-                "La pantalla para crear y calcular presupuestos todavía no está implementada.",
-                "Próxima etapa",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            AbrirFormularioPresupuesto(null);
+        }
+
+        private void botonVerPresupuestos_Click(object sender, EventArgs e)
+        {
+            if (formularioPresupuestos == null || formularioPresupuestos.IsDisposed)
+            {
+                formularioPresupuestos = PrepararFormularioHijo(new PresupuestosForm(_presupuestoController));
+                formularioPresupuestos.SolicitarEdicion += AbrirFormularioPresupuesto;
+                formularioPresupuestos.SolicitarInicio += MostrarInicio;
+            }
+
+            formularioPresupuestos.ActualizarLista();
+            MostrarPantalla(formularioPresupuestos, btnInicio, "Historial de presupuestos", "Consultá el detalle, el PDF y las modificaciones de los presupuestos guardados.");
+        }
+
+        private void AbrirFormularioPresupuesto(Presupuesto presupuesto)
+        {
+            if (formularioPresupuesto != null && !formularioPresupuesto.IsDisposed)
+            {
+                formularioPresupuesto.Dispose();
+            }
+
+            formularioPresupuesto = PrepararFormularioHijo(
+                presupuesto == null
+                    ? new PresupuestoForm(_presupuestoController)
+                    : new PresupuestoForm(_presupuestoController, presupuesto));
+            formularioPresupuesto.Guardado += PresupuestoGuardado;
+
+            string titulo = presupuesto == null ? "Crear presupuesto" : "Modificar presupuesto #" + presupuesto.Id;
+            string descripcion = presupuesto == null
+                ? "Completá los datos del contacto, el evento, los menús y los servicios."
+                : "Actualizá los datos del presupuesto seleccionado.";
+            MostrarPantalla(formularioPresupuesto, btnInicio, titulo, descripcion);
+        }
+
+        private void PresupuestoGuardado(Presupuesto presupuesto)
+        {
+            if (formularioPresupuestos == null || formularioPresupuestos.IsDisposed)
+            {
+                formularioPresupuestos = PrepararFormularioHijo(new PresupuestosForm(_presupuestoController));
+                formularioPresupuestos.SolicitarEdicion += AbrirFormularioPresupuesto;
+                formularioPresupuestos.SolicitarInicio += MostrarInicio;
+            }
+
+            formularioPresupuestos.ActualizarLista(presupuesto.Id);
+            MostrarPantalla(formularioPresupuestos, btnInicio, "Historial de presupuestos", "El presupuesto quedó guardado y aparece seleccionado en su historial.");
+        }
+
+        private void FormularioPresupuestoCancelado()
+        {
+            if (formularioPresupuesto != null)
+            {
+                formularioPresupuesto.Dispose();
+                formularioPresupuesto = null;
+            }
+
+            MostrarInicio();
+        }
+
+        private void botonCancelarPresupuesto_Click(object sender, EventArgs e)
+        {
+            FormularioPresupuestoCancelado();
         }
     }
 }

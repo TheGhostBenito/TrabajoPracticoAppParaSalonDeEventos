@@ -1,51 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using proyecto_integrador.repository;
+using System;
 
 namespace proyecto_integrador.models
 {
     public class DetalleDeMenus
     {
-        private int cantidadDeMenusUnitaria;
-        private int cantidadDeMenusConExcepciones;
+        public int CantidadAdultos { get; private set; }
+        public int CantidadNinos { get; private set; }
+        public TipoDeExclusionDeMenu ExclusionDelMenu { get; private set; }
+        public MenuDeComida MenuElegido { get; private set; }
 
-        public int CantidadDeMenusUnitaria
+        public DetalleDeMenus(int cantidadAdultos, int cantidadNinos, TipoDeExclusionDeMenu exclusion, MenuDeComida menu)
         {
-            get => cantidadDeMenusUnitaria;
-            set
+            if (cantidadAdultos < 0 || cantidadNinos < 0)
             {
-                if (value < 0) throw new ArgumentException("La cantidad no puede ser negativa.");
-                cantidadDeMenusUnitaria = value;
+                throw new ArgumentException("Las cantidades de menús no pueden ser negativas.");
             }
-        }
 
-        public int CantidadDeMenusConExcepciones
-        {
-            get => cantidadDeMenusConExcepciones;
-            set
+            if (menu == null)
             {
-                if (value < 0) throw new ArgumentException("La cantidad no puede ser negativa.");
-                cantidadDeMenusConExcepciones = value;
+                throw new ArgumentNullException("menu");
             }
-        }
 
-
-
-
-        public TipoDeExclusionDeMenu ExclusionDelMenu;
-        public MenuDeComida MenuElegido;
-
-       
-
-        public DetalleDeMenus(int cantidadUnitaria, int cantidadConExcepciones, TipoDeExclusionDeMenu exclusion, MenuDeComida menu) //constructor de la clase DetalleDeMenus refactorizado para usar propiedades en lugar de campos privados
-        {
-            CantidadDeMenusUnitaria = cantidadUnitaria;
-            CantidadDeMenusConExcepciones = cantidadConExcepciones;
+            CantidadAdultos = cantidadAdultos;
+            CantidadNinos = cantidadNinos;
             ExclusionDelMenu = exclusion;
             MenuElegido = menu;
+        }
+
+        public decimal CalcularSubtotal()
+        {
+            decimal costoAdultos = CantidadAdultos * MenuElegido.CostoPorAdulto;
+            decimal costoNinos = CantidadNinos * MenuElegido.CostoPorNiño;
+            return costoAdultos + costoNinos;
         }
     }
 }
