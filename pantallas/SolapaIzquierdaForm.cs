@@ -14,7 +14,7 @@ namespace proyecto_integrador.pantallas
         private MenuDeComidaForm formularioMenu;
         private ServiciosAdicionalesForm formularioServiciosAdicionales;
         private PresupuestoForm formularioPresupuesto;
-        private PresupuestosForm formularioPresupuestos;
+        private ConsultaPresupuestosForm formularioPresupuestos;
         private readonly PresupuestoController _presupuestoController;
         private Button botonCancelarPresupuesto;
         private Button botonSeccionActiva;
@@ -231,7 +231,7 @@ namespace proyecto_integrador.pantallas
         {
             if (formularioPresupuestos == null || formularioPresupuestos.IsDisposed)
             {
-                formularioPresupuestos = PrepararFormularioHijo(new PresupuestosForm(_presupuestoController));
+                formularioPresupuestos = PrepararFormularioHijo(new ConsultaPresupuestosForm(_presupuestoController));
                 formularioPresupuestos.SolicitarEdicion += AbrirFormularioPresupuesto;
                 formularioPresupuestos.SolicitarInicio += MostrarInicio;
             }
@@ -264,7 +264,7 @@ namespace proyecto_integrador.pantallas
         {
             if (formularioPresupuestos == null || formularioPresupuestos.IsDisposed)
             {
-                formularioPresupuestos = PrepararFormularioHijo(new PresupuestosForm(_presupuestoController));
+                formularioPresupuestos = PrepararFormularioHijo(new ConsultaPresupuestosForm(_presupuestoController));
                 formularioPresupuestos.SolicitarEdicion += AbrirFormularioPresupuesto;
                 formularioPresupuestos.SolicitarInicio += MostrarInicio;
             }
