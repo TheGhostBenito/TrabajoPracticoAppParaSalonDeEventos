@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace proyecto_integrador.pantallas
 {
-    partial class PresupuestosForm
+    partial class ConsultaPresupuestosForm
     {
         private IContainer components = null;
         private Panel _panelAcciones;
@@ -172,7 +172,7 @@ namespace proyecto_integrador.pantallas
             this._detalle.ReadOnly = true;
             this._detalle.ScrollBars = ScrollBars.Vertical;
             // 
-            // PresupuestosForm
+            // ConsultaPresupuestosForm
             // 
             this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = Color.FromArgb(246, 248, 251);
@@ -181,7 +181,7 @@ namespace proyecto_integrador.pantallas
             this.Controls.Add(this._grilla);
             this.Controls.Add(this._panelAcciones);
             this.Font = new Font("Segoe UI", 9F);
-            this.Name = "PresupuestosForm";
+            this.Name = "ConsultaPresupuestosForm";
             this.Text = "Historial de presupuestos";
             ((ISupportInitialize)(this._grilla)).EndInit();
             this._panelAcciones.ResumeLayout(false);

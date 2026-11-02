@@ -10,20 +10,20 @@ using proyecto_integrador.models;
 
 namespace proyecto_integrador.pantallas
 {
-    public partial class PresupuestosForm : Form
+    public partial class ConsultaPresupuestosForm : Form
     {
         private readonly PresupuestoController _controller;
 
         public event Action<Presupuesto> SolicitarEdicion;
         public event Action SolicitarInicio;
 
-        public PresupuestosForm()
+        public ConsultaPresupuestosForm()
         {
             _controller = null;
             InitializeComponent();
         }
 
-        public PresupuestosForm(PresupuestoController controller)
+        public ConsultaPresupuestosForm(PresupuestoController controller)
         {
             if (controller == null)
             {

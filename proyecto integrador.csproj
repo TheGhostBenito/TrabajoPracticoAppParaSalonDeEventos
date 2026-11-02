@@ -58,11 +58,11 @@
     <Compile Include="pantallas\PresupuestoForm.Designer.cs">
       <DependentUpon>PresupuestoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="pantallas\PresupuestosForm.cs">
+    <Compile Include="pantallas\ConsultaPresupuestosForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="pantallas\PresupuestosForm.Designer.cs">
-      <DependentUpon>PresupuestosForm.cs</DependentUpon>
+    <Compile Include="pantallas\ConsultaPresupuestosForm.Designer.cs">
+      <DependentUpon>ConsultaPresupuestosForm.cs</DependentUpon>
     </Compile>
     <Compile Include="pantallas\SolapaIzquierdaForm.cs">
       <SubType>Form</SubType>
