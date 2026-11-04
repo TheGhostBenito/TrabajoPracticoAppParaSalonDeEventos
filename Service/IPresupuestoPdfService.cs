@@ -8,5 +8,3 @@ namespace proyecto_integrador.Service
         string Guardar(Presupuesto presupuesto, string ruta);
     }
 }
-
-// Genera el PDF del presupuesto y devuelve la ruta donde fue guardado
