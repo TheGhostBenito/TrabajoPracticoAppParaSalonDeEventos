@@ -7,8 +7,8 @@ using System.Collections.Generic;
 
 public sealed class ServiciosAdicionalesController
 {
-    // Service utilizado para gestionar los servicios adicionales
-    // Referencia al Service Se asigna una sola vez en el constructor
+    // service utilizado para gestionar los servicios adicionales
+    // referencia al Service Se asigna una sola vez en el constructor
     private readonly IServiciosAdicionalesService _service;
 
     // Recibe el Service mediante inyección de dependencias
