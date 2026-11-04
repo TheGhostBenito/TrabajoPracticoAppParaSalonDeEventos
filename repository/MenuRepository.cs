@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using proyecto_integrador.models; // Llama y accede a la clase MenuDeComida. Que se encuentra dentro de model
+using proyecto_integrador.models;
 
 namespace proyecto_integrador.repository
 {
-    public sealed class MenuRepository
+    // Singleton: una única instancia que guarda la lista de menús mientras la app está abierta.
+    public sealed class MenuRepository : IMenuRepository
     {
         private static readonly MenuRepository instancia = new MenuRepository();
-        private readonly List<MenuDeComida> _menus = new List<MenuDeComida>();
+        private readonly List<MenuDeComida> _menus;
+        private int _proximoId;
 
         private MenuRepository()
         {
             // Menús de ejemplo para tener algo en la grilla
+            _menus = new List<MenuDeComida>();
             _menus.Add(new MenuDeComida(1, "Menu A", 50.00m, 30.00m));
             _menus.Add(new MenuDeComida(2, "Menu B", 75.00m, 45.00m));
             _menus.Add(new MenuDeComida(3, "Menu C", 100.00m, 60.00m));
+            _proximoId = 4;
         }
 
         public static MenuRepository Instance
@@ -27,37 +28,58 @@ namespace proyecto_integrador.repository
 
         public List<MenuDeComida> ObtenerTodos()
         {
-            return _menus.ToList();
+            return new List<MenuDeComida>(_menus);
+        }
+
+        public MenuDeComida ObtenerPorId(int id)
+        {
+            foreach (MenuDeComida menu in _menus)
+            {
+                if (menu.Id == id)
+                {
+                    return menu;
+                }
+            }
+
+            return null;
         }
 
         public void Crear(MenuDeComida menu)
         {
-            menu.Id = _menus.Any() ? _menus.Max(m => m.Id) + 1 : 1;
-            _menus.Add(menu);
-        }
-
-        public bool Eliminar(int id)
-        {
-            MenuDeComida menu = _menus.FirstOrDefault(m => m.Id == id);
-            if (menu != null)
+            if (menu == null)
             {
-                _menus.Remove(menu);
-                return true;
+                throw new ArgumentNullException("menu");
             }
-            return false;
+
+            menu.Id = _proximoId;
+            _proximoId++;
+            _menus.Add(menu);
         }
 
         public bool Modificar(MenuDeComida menu)
         {
-            MenuDeComida existente = _menus.FirstOrDefault(m => m.Id == menu.Id);
-            if (existente != null)
+            MenuDeComida existente = ObtenerPorId(menu.Id);
+            if (existente == null)
             {
-                existente.Nombre = menu.Nombre;
-                existente.CostoPorAdulto = menu.CostoPorAdulto;
-                existente.CostoPorNiño = menu.CostoPorNiño;
-                return true;
+                return false;
             }
-            return false;
+
+            existente.Nombre = menu.Nombre;
+            existente.CostoPorAdulto = menu.CostoPorAdulto;
+            existente.CostoPorNiño = menu.CostoPorNiño;
+            return true;
+        }
+
+        public bool Eliminar(int id)
+        {
+            MenuDeComida existente = ObtenerPorId(id);
+            if (existente == null)
+            {
+                return false;
+            }
+
+            _menus.Remove(existente);
+            return true;
         }
     }
 }

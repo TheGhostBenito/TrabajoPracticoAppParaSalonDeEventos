@@ -1,27 +1,47 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Forms;
-using proyecto_integrador.models;
-using proyecto_integrador.service;
+using proyecto_integrador.controller;
+using proyecto_integrador.dto;
 
 namespace proyecto_integrador.pantallas
 {
     public partial class SalonForm : Form
     {
+        // La vista solo conoce al Controller y a los DTO. No conoce Services, Repositories ni entidades.
+        private readonly SalonController _controller;
+
+        // Constructor sin parámetros: lo necesita el diseñador de Visual Studio.
         public SalonForm()
         {
             InitializeComponent();
+        }
+
+        public SalonForm(SalonController controller)
+            : this()
+        {
+            if (controller == null)
+            {
+                throw new ArgumentNullException("controller");
+            }
+
+            _controller = controller;
             dgvSalonesCreados.AutoGenerateColumns = false; // Usamos las columnas que ya están definidas en el diseñador
             CargarGrilla();
 
             // Al abrir la pantalla, que no quede ninguna fila seleccionada
-            this.Shown += delegate { dgvSalonesCreados.ClearSelection(); };
+            this.Shown += SalonForm_Shown;
+        }
+
+        private void SalonForm_Shown(object sender, EventArgs e)
+        {
+            dgvSalonesCreados.ClearSelection();
         }
 
         private void CargarGrilla()
         {
             dgvSalonesCreados.DataSource = null;
-            dgvSalonesCreados.DataSource = SalonService.ObtenerSalones();
+            dgvSalonesCreados.DataSource = _controller.ObtenerTodos();
             dgvSalonesCreados.ClearSelection();
         }
 
@@ -33,7 +53,7 @@ namespace proyecto_integrador.pantallas
                 return;
             }
 
-            Salon seleccionado = dgvSalonesCreados.Rows[e.RowIndex].DataBoundItem as Salon;
+            SalonDto seleccionado = dgvSalonesCreados.Rows[e.RowIndex].DataBoundItem as SalonDto;
             if (seleccionado == null)
             {
                 return;
@@ -54,7 +74,7 @@ namespace proyecto_integrador.pantallas
 
             try
             {
-                SalonService.CrearSalon(txtBoxNombre.Text, txtBoxUbicacion.Text, monto);
+                _controller.Crear(CrearDto(0, monto));
                 CargarGrilla();
                 LimpiarCampos();
             }
@@ -66,7 +86,7 @@ namespace proyecto_integrador.pantallas
 
         private void btnModificarSalon_Click(object sender, EventArgs e)
         {
-            Salon seleccionado = ObtenerSalonSeleccionado();
+            SalonDto seleccionado = ObtenerSalonSeleccionado();
             if (seleccionado == null)
             {
                 MessageBox.Show("Seleccioná un salón de la lista para modificarlo.", "Atención",
@@ -82,7 +102,14 @@ namespace proyecto_integrador.pantallas
 
             try
             {
-                SalonService.ModificarSalon(seleccionado, txtBoxNombre.Text, txtBoxUbicacion.Text, monto);
+                bool modificado = _controller.Modificar(CrearDto(seleccionado.Id, monto));
+                if (!modificado)
+                {
+                    MessageBox.Show("No se encontró el salón seleccionado.", "Atención",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
                 CargarGrilla();
                 LimpiarCampos();
             }
@@ -94,7 +121,7 @@ namespace proyecto_integrador.pantallas
 
         private void btnEliminarSalon_Click(object sender, EventArgs e)
         {
-            Salon seleccionado = ObtenerSalonSeleccionado();
+            SalonDto seleccionado = ObtenerSalonSeleccionado();
             if (seleccionado == null)
             {
                 MessageBox.Show("Seleccioná un salón de la lista para eliminarlo.", "Atención",
@@ -108,7 +135,7 @@ namespace proyecto_integrador.pantallas
 
             if (respuesta == DialogResult.Yes)
             {
-                SalonService.EliminarSalon(seleccionado);
+                _controller.Eliminar(seleccionado.Id);
                 CargarGrilla();
                 LimpiarCampos();
             }
@@ -119,16 +146,28 @@ namespace proyecto_integrador.pantallas
             LimpiarCampos();
         }
 
-        private Salon ObtenerSalonSeleccionado()
+        private SalonDto ObtenerSalonSeleccionado()
         {
             if (dgvSalonesCreados.SelectedRows.Count == 0)
             {
                 return null;
             }
-            return dgvSalonesCreados.SelectedRows[0].DataBoundItem as Salon;
+
+            return dgvSalonesCreados.SelectedRows[0].DataBoundItem as SalonDto;
         }
 
-        // Convierte el texto del monto a número. Eso es de la pantalla; las reglas (>= 0, etc.) las valida el service
+        // Arma el DTO con lo que se escribió en pantalla. Las reglas (>= 0, nombre vacío, etc.) las valida el Service.
+        private SalonDto CrearDto(int id, decimal monto)
+        {
+            SalonDto dto = new SalonDto();
+            dto.Id = id;
+            dto.Nombre = txtBoxNombre.Text;
+            dto.Ubicacion = txtBoxUbicacion.Text;
+            dto.CostoBase = monto;
+            return dto;
+        }
+
+        // Convierte el texto del monto a número. Eso es de la pantalla; las reglas las valida el service
         private bool TryObtenerMonto(out decimal monto)
         {
             if (!decimal.TryParse(txtBoxMonto.Text.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out monto))
@@ -137,6 +176,7 @@ namespace proyecto_integrador.pantallas
                 txtBoxMonto.Focus();
                 return false;
             }
+
             return true;
         }
 

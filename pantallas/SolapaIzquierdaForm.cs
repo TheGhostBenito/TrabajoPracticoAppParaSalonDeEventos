@@ -1,9 +1,8 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using proyecto_integrador.controller;
-using proyecto_integrador.models;
-using proyecto_integrador.pantallas;
+using proyecto_integrador.dto;
 
 namespace proyecto_integrador.pantallas
 {
@@ -15,14 +14,52 @@ namespace proyecto_integrador.pantallas
         private ServiciosAdicionalesForm formularioServiciosAdicionales;
         private PresupuestoForm formularioPresupuesto;
         private ConsultaPresupuestosForm formularioPresupuestos;
+        private readonly SalonController _salonController;
+        private readonly MenuController _menuController;
+        private readonly ServiciosAdicionalesController _serviciosController;
         private readonly PresupuestoController _presupuestoController;
         private Button botonCancelarPresupuesto;
         private Button botonSeccionActiva;
 
+        // Constructor sin parámetros: lo necesita el diseñador de Visual Studio.
         public SolapaIzquierdaForm()
         {
-            _presupuestoController = new PresupuestoController();
             InitializeComponent();
+        }
+
+        // Recibe los controllers ya armados (los crea Program.Main). La vista no crea Services ni Repositories.
+        public SolapaIzquierdaForm(
+            SalonController salonController,
+            MenuController menuController,
+            ServiciosAdicionalesController serviciosController,
+            PresupuestoController presupuestoController)
+            : this()
+        {
+            if (salonController == null)
+            {
+                throw new ArgumentNullException("salonController");
+            }
+
+            if (menuController == null)
+            {
+                throw new ArgumentNullException("menuController");
+            }
+
+            if (serviciosController == null)
+            {
+                throw new ArgumentNullException("serviciosController");
+            }
+
+            if (presupuestoController == null)
+            {
+                throw new ArgumentNullException("presupuestoController");
+            }
+
+            _salonController = salonController;
+            _menuController = menuController;
+            _serviciosController = serviciosController;
+            _presupuestoController = presupuestoController;
+
             CrearAccionCancelarPresupuesto();
             CrearPantallaInicio();
             MostrarInicio();
@@ -140,7 +177,8 @@ namespace proyecto_integrador.pantallas
         {
             if (formularioSalon == null || formularioSalon.IsDisposed)
             {
-                formularioSalon = PrepararFormularioHijo(new SalonForm());
+                formularioSalon = new SalonForm(_salonController);
+                PrepararFormularioHijo(formularioSalon);
             }
 
             MostrarPantalla(formularioSalon, btnSalon, "Salón", "Administrá los salones disponibles para los eventos.");
@@ -150,7 +188,8 @@ namespace proyecto_integrador.pantallas
         {
             if (formularioMenu == null || formularioMenu.IsDisposed)
             {
-                formularioMenu = PrepararFormularioHijo(new MenuDeComidaForm());
+                formularioMenu = new MenuDeComidaForm(_menuController);
+                PrepararFormularioHijo(formularioMenu);
             }
 
             MostrarPantalla(formularioMenu, btnMenu, "Menú", "Opciones de menú y valores por invitado.");
@@ -160,7 +199,8 @@ namespace proyecto_integrador.pantallas
         {
             if (formularioServiciosAdicionales == null || formularioServiciosAdicionales.IsDisposed)
             {
-                formularioServiciosAdicionales = PrepararFormularioHijo(new ServiciosAdicionalesForm());
+                formularioServiciosAdicionales = new ServiciosAdicionalesForm(_serviciosController);
+                PrepararFormularioHijo(formularioServiciosAdicionales);
             }
 
             MostrarPantalla(formularioServiciosAdicionales, btnServiciosAdicionales, "Servicios adicionales", "Administrá los servicios de monto fijo que se pueden sumar a un evento.");
@@ -200,13 +240,12 @@ namespace proyecto_integrador.pantallas
             ActualizarBotonActivo(botonActivo);
         }
 
-        private TFormulario PrepararFormularioHijo<TFormulario>(TFormulario formulario) where TFormulario : Form
+        private void PrepararFormularioHijo(Form formulario)
         {
             formulario.TopLevel = false;
             formulario.FormBorderStyle = FormBorderStyle.None;
             formulario.Dock = DockStyle.Fill;
             formulario.Visible = false;
-            return formulario;
         }
 
         private void ActualizarBotonActivo(Button botonActivo)
@@ -231,7 +270,8 @@ namespace proyecto_integrador.pantallas
         {
             if (formularioPresupuestos == null || formularioPresupuestos.IsDisposed)
             {
-                formularioPresupuestos = PrepararFormularioHijo(new ConsultaPresupuestosForm(_presupuestoController));
+                formularioPresupuestos = new ConsultaPresupuestosForm(_presupuestoController);
+                PrepararFormularioHijo(formularioPresupuestos);
                 formularioPresupuestos.SolicitarEdicion += AbrirFormularioPresupuesto;
                 formularioPresupuestos.SolicitarInicio += MostrarInicio;
             }
@@ -240,31 +280,39 @@ namespace proyecto_integrador.pantallas
             MostrarPantalla(formularioPresupuestos, btnInicio, "Historial de presupuestos", "Consultá el detalle, el PDF y las modificaciones de los presupuestos guardados.");
         }
 
-        private void AbrirFormularioPresupuesto(Presupuesto presupuesto)
+        private void AbrirFormularioPresupuesto(PresupuestoDto presupuesto)
         {
             if (formularioPresupuesto != null && !formularioPresupuesto.IsDisposed)
             {
                 formularioPresupuesto.Dispose();
             }
 
-            formularioPresupuesto = PrepararFormularioHijo(
-                presupuesto == null
-                    ? new PresupuestoForm(_presupuestoController)
-                    : new PresupuestoForm(_presupuestoController, presupuesto));
-            formularioPresupuesto.Guardado += PresupuestoGuardado;
+            string titulo;
+            string descripcion;
+            if (presupuesto == null)
+            {
+                formularioPresupuesto = new PresupuestoForm(_presupuestoController);
+                titulo = "Crear presupuesto";
+                descripcion = "Completá los datos del contacto, el evento, los menús y los servicios.";
+            }
+            else
+            {
+                formularioPresupuesto = new PresupuestoForm(_presupuestoController, presupuesto);
+                titulo = "Modificar presupuesto #" + presupuesto.Id;
+                descripcion = "Actualizá los datos del presupuesto seleccionado.";
+            }
 
-            string titulo = presupuesto == null ? "Crear presupuesto" : "Modificar presupuesto #" + presupuesto.Id;
-            string descripcion = presupuesto == null
-                ? "Completá los datos del contacto, el evento, los menús y los servicios."
-                : "Actualizá los datos del presupuesto seleccionado.";
+            PrepararFormularioHijo(formularioPresupuesto);
+            formularioPresupuesto.Guardado += PresupuestoGuardado;
             MostrarPantalla(formularioPresupuesto, btnInicio, titulo, descripcion);
         }
 
-        private void PresupuestoGuardado(Presupuesto presupuesto)
+        private void PresupuestoGuardado(PresupuestoDto presupuesto)
         {
             if (formularioPresupuestos == null || formularioPresupuestos.IsDisposed)
             {
-                formularioPresupuestos = PrepararFormularioHijo(new ConsultaPresupuestosForm(_presupuestoController));
+                formularioPresupuestos = new ConsultaPresupuestosForm(_presupuestoController);
+                PrepararFormularioHijo(formularioPresupuestos);
                 formularioPresupuestos.SolicitarEdicion += AbrirFormularioPresupuesto;
                 formularioPresupuestos.SolicitarInicio += MostrarInicio;
             }

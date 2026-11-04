@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -11,22 +11,23 @@ namespace proyecto_integrador.pantallas
 {
     public partial class PresupuestoForm : Form
     {
+        // La vista solo captura datos, arma DTOs, se los pasa al Controller y muestra lo que vuelve.
         private readonly PresupuestoController _controller;
-        private readonly Presupuesto _presupuestoOriginal;
+        private readonly PresupuestoDto _presupuestoOriginal;
         private readonly BindingList<DetalleMenuDto> _menusPrincipales;
         private readonly BindingList<DetalleMenuDto> _menusPersonalizados;
-        private List<MenuDeComida> _catalogoMenus;
-        private bool _ajustandoFecha;
+        private List<MenuDto> _catalogoMenus;
 
-        public event Action<Presupuesto> Guardado;
+        public event Action<PresupuestoDto> Guardado;
 
+        // Constructor sin parámetros: lo necesita el diseñador de Visual Studio.
         public PresupuestoForm()
         {
             _controller = null;
             _presupuestoOriginal = null;
             _menusPrincipales = new BindingList<DetalleMenuDto>();
             _menusPersonalizados = new BindingList<DetalleMenuDto>();
-            _catalogoMenus = new List<MenuDeComida>();
+            _catalogoMenus = new List<MenuDto>();
             InitializeComponent();
         }
 
@@ -35,7 +36,7 @@ namespace proyecto_integrador.pantallas
         {
         }
 
-        public PresupuestoForm(PresupuestoController controller, Presupuesto presupuesto)
+        public PresupuestoForm(PresupuestoController controller, PresupuestoDto presupuesto)
         {
             if (controller == null)
             {
@@ -46,7 +47,7 @@ namespace proyecto_integrador.pantallas
             _presupuestoOriginal = presupuesto;
             _menusPrincipales = new BindingList<DetalleMenuDto>();
             _menusPersonalizados = new BindingList<DetalleMenuDto>();
-            _catalogoMenus = new List<MenuDeComida>();
+            _catalogoMenus = new List<MenuDto>();
 
             InitializeComponent();
             _grillaMenusPrincipales.DataSource = _menusPrincipales;
@@ -67,50 +68,36 @@ namespace proyecto_integrador.pantallas
                 }
 
                 ActualizarUbicacion();
-                ActualizarTotal();
             }
 
             ActualizarTotal();
         }
 
+        private int ObtenerIdPresupuestoOriginal()
+        {
+            if (_presupuestoOriginal == null)
+            {
+                return 0;
+            }
+
+            return _presupuestoOriginal.Id;
+        }
+
+        // El Controller devuelve los catálogos ya completos ,incluso con los datos del presupuesto que se modifica
         private void CargarCatalogos()
         {
-            List<Salon> salones = _controller.ObtenerSalones();
-            _catalogoMenus = _controller.ObtenerMenus();
-            List<ServiciosAdicionales> servicios = _controller.ObtenerServiciosAdicionales();
-
-            if (_presupuestoOriginal != null)
-            {
-                if (!salones.Exists(salon => salon.Id == _presupuestoOriginal.SalonDelEvento.Id))
-                {
-                    salones.Add(_presupuestoOriginal.SalonDelEvento);
-                }
-
-                foreach (DetalleDeMenus detalle in _presupuestoOriginal.Menues)
-                {
-                    if (!_catalogoMenus.Exists(menu => menu.Id == detalle.MenuElegido.Id))
-                    {
-                        _catalogoMenus.Add(detalle.MenuElegido);
-                    }
-                }
-
-                foreach (ServiciosAdicionales servicio in _presupuestoOriginal.ServiciosAdicionales)
-                {
-                    if (servicio.Id > 0 && !servicios.Exists(item => item.Id == servicio.Id))
-                    {
-                        servicios.Add(servicio);
-                    }
-                }
-            }
+            int presupuestoId = ObtenerIdPresupuestoOriginal();
+            List<SalonDto> salones = _controller.ObtenerSalones(presupuestoId);
+            _catalogoMenus = _controller.ObtenerMenus(presupuestoId);
+            List<ServicioAdicionalDto> servicios = _controller.ObtenerServiciosAdicionales(presupuestoId);
 
             _comboSalon.DisplayMember = "Nombre";
             _comboSalon.DataSource = salones;
             DataGridViewComboBoxColumn columnaMenuPrincipal = _grillaMenusPrincipales.Columns["columnaMenuPrincipal"] as DataGridViewComboBoxColumn;
             DataGridViewComboBoxColumn columnaMenuPersonalizado = _grillaMenusPersonalizados.Columns["columnaMenuPersonalizado"] as DataGridViewComboBoxColumn;
             DataGridViewComboBoxColumn columnaParticularidad = _grillaMenusPersonalizados.Columns["columnaParticularidad"] as DataGridViewComboBoxColumn;
-            List<MenuDeComida> menusDisponibles = new List<MenuDeComida>(_catalogoMenus);
-            columnaMenuPrincipal.DataSource = new List<MenuDeComida>(menusDisponibles);
-            columnaMenuPersonalizado.DataSource = new List<MenuDeComida>(menusDisponibles);
+            columnaMenuPrincipal.DataSource = new List<MenuDto>(_catalogoMenus);
+            columnaMenuPersonalizado.DataSource = new List<MenuDto>(_catalogoMenus);
             columnaMenuPrincipal.DisplayMember = "Nombre";
             columnaMenuPersonalizado.DisplayMember = "Nombre";
             columnaMenuPrincipal.ValueMember = "Id";
@@ -124,7 +111,7 @@ namespace proyecto_integrador.pantallas
             };
 
             _listaServiciosDisponibles.Items.Clear();
-            foreach (ServiciosAdicionales servicio in servicios)
+            foreach (ServicioAdicionalDto servicio in servicios)
             {
                 _listaServiciosDisponibles.Items.Add(servicio);
             }
@@ -132,34 +119,53 @@ namespace proyecto_integrador.pantallas
 
         private void ConfigurarEventos()
         {
-            _comboSalon.SelectedIndexChanged += delegate { ActualizarUbicacion(); ActualizarTotal(); };
-            _selectorFecha.ValueChanged += selectorFecha_ValueChanged;
-            _selectorHoraInicio.ValueChanged += delegate { ActualizarTotal(); };
-            _numeroDuracion.ValueChanged += delegate { ActualizarTotal(); };
-            _numeroAdultos.ValueChanged += delegate { ActualizarTotal(); };
-            _numeroNinos.ValueChanged += delegate { ActualizarTotal(); };
-            _porcentajeMenuPrincipal.ValueChanged += delegate { ActualizarTotal(); };
-            _porcentajeMenuPersonalizado.ValueChanged += delegate { ActualizarTotal(); };
+            _comboSalon.SelectedIndexChanged += comboSalon_SelectedIndexChanged;
+            _selectorFecha.ValueChanged += ActualizarTotalEvento;
+            _selectorHoraInicio.ValueChanged += ActualizarTotalEvento;
+            _numeroDuracion.ValueChanged += ActualizarTotalEvento;
+            _numeroAdultos.ValueChanged += ActualizarTotalEvento;
+            _numeroNinos.ValueChanged += ActualizarTotalEvento;
+            _porcentajeMenuPrincipal.ValueChanged += ActualizarTotalEvento;
+            _porcentajeMenuPersonalizado.ValueChanged += ActualizarTotalEvento;
             _grillaMenusPrincipales.DataError += grillaMenus_DataError;
             _grillaMenusPersonalizados.DataError += grillaMenus_DataError;
             _grillaMenusPrincipales.CurrentCellDirtyStateChanged += grillaMenus_CurrentCellDirtyStateChanged;
             _grillaMenusPersonalizados.CurrentCellDirtyStateChanged += grillaMenus_CurrentCellDirtyStateChanged;
-            _grillaMenusPrincipales.CellValueChanged += delegate { ActualizarTotal(); };
-            _grillaMenusPersonalizados.CellValueChanged += delegate { ActualizarTotal(); };
-            _botonAgregarMenuPrincipal.Click += delegate { AgregarMenuPrincipal(); };
-            _botonQuitarMenuPrincipal.Click += delegate { QuitarFila(_grillaMenusPrincipales, _menusPrincipales); };
-            _botonAgregarMenuPersonalizado.Click += delegate { AgregarMenuPersonalizado(); };
-            _botonQuitarMenuPersonalizado.Click += delegate { QuitarFila(_grillaMenusPersonalizados, _menusPersonalizados); };
+            _grillaMenusPrincipales.CellValueChanged += ActualizarTotalEvento;
+            _grillaMenusPersonalizados.CellValueChanged += ActualizarTotalEvento;
+            _botonAgregarMenuPrincipal.Click += botonAgregarMenuPrincipal_Click;
+            _botonQuitarMenuPrincipal.Click += botonQuitarMenuPrincipal_Click;
+            _botonAgregarMenuPersonalizado.Click += botonAgregarMenuPersonalizado_Click;
+            _botonQuitarMenuPersonalizado.Click += botonQuitarMenuPersonalizado_Click;
             _botonAgregarServicio.Click += botonAgregarServicio_Click;
             _botonQuitarServicio.Click += botonQuitarServicio_Click;
             _botonGuardar.Click += botonGuardar_Click;
-            _menusPrincipales.ListChanged += delegate { ActualizarTotal(); };
-            _menusPersonalizados.ListChanged += delegate { ActualizarTotal(); };
-            _listaServiciosDisponibles.ItemCheck += delegate
-            {
-                BeginInvoke((MethodInvoker)delegate { ActualizarTotal(); });
-            };
-            _listaServiciosPersonalizados.SelectedIndexChanged += delegate { ActualizarTotal(); };
+            _menusPrincipales.ListChanged += ActualizarTotalEvento;
+            _menusPersonalizados.ListChanged += ActualizarTotalEvento;
+            _listaServiciosDisponibles.ItemCheck += listaServiciosDisponibles_ItemCheck;
+            _listaServiciosPersonalizados.SelectedIndexChanged += ActualizarTotalEvento;
+        }
+
+        // Un único manejador para todos los controles que, al cambiar, solo tienen que refrescar el total.
+        private void ActualizarTotalEvento(object sender, EventArgs e)
+        {
+            ActualizarTotal();
+        }
+
+        private void comboSalon_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ActualizarUbicacion();
+            ActualizarTotal();
+        }
+
+        // ItemCheck se dispara artes de que cambie el tilde. Por eso se desconecta el evento un instante,
+        // se aplica el tilde a mano, se vuelve a conectar y recién ahí se actualiza el total
+        private void listaServiciosDisponibles_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            _listaServiciosDisponibles.ItemCheck -= listaServiciosDisponibles_ItemCheck;
+            _listaServiciosDisponibles.SetItemCheckState(e.Index, e.NewValue);
+            _listaServiciosDisponibles.ItemCheck += listaServiciosDisponibles_ItemCheck;
+            ActualizarTotal();
         }
 
         private void grillaMenus_DataError(object sender, DataGridViewDataErrorEventArgs e)
@@ -178,32 +184,32 @@ namespace proyecto_integrador.pantallas
             }
         }
 
-        private void CargarPresupuestoExistente(Presupuesto presupuesto)
+        private void CargarPresupuestoExistente(PresupuestoDto presupuesto)
         {
             _textoNombreContacto.Text = presupuesto.NombreContacto;
             _textoEmail.Text = presupuesto.EmailContacto;
             _textoTelefono.Text = presupuesto.TelefonoContacto;
             _selectorFecha.Value = presupuesto.FechaEvento;
             _selectorHoraInicio.Value = DateTime.Today.Add(presupuesto.HoraInicio);
-            _numeroDuracion.Value = presupuesto.Evento.Duracion;
-            _numeroAdultos.Value = presupuesto.Evento.CantidadAdultos;
-            _numeroNinos.Value = presupuesto.Evento.CantidadNinos;
+            _numeroDuracion.Value = presupuesto.DuracionHoras;
+            _numeroAdultos.Value = presupuesto.CantidadAdultos;
+            _numeroNinos.Value = presupuesto.CantidadNinos;
             _porcentajeMenuPrincipal.Value = presupuesto.PorcentajeAdicionalMenuPrincipal;
             _porcentajeMenuPersonalizado.Value = presupuesto.PorcentajeAdicionalMenuPersonalizado;
-            SeleccionarSalon(presupuesto.SalonDelEvento.Id);
+            SeleccionarSalon(presupuesto.SalonId);
             _textoUbicacion.Text = presupuesto.UbicacionEvento;
 
             _menusPrincipales.Clear();
             _menusPersonalizados.Clear();
-            foreach (DetalleDeMenus detalle in presupuesto.Menues)
+            foreach (DetalleMenuPresupuestoDto detalle in presupuesto.Menues)
             {
                 DetalleMenuDto detalleDto = new DetalleMenuDto();
-                detalleDto.MenuId = detalle.MenuElegido.Id;
+                detalleDto.MenuId = detalle.MenuId;
                 detalleDto.CantidadAdultos = detalle.CantidadAdultos;
                 detalleDto.CantidadNinos = detalle.CantidadNinos;
-                detalleDto.Particularidad = detalle.ExclusionDelMenu;
+                detalleDto.Particularidad = detalle.Particularidad;
 
-                if (detalle.ExclusionDelMenu == TipoDeExclusionDeMenu.Ninguna)
+                if (detalle.Particularidad == TipoDeExclusionDeMenu.Ninguna)
                 {
                     _menusPrincipales.Add(detalleDto);
                 }
@@ -213,7 +219,7 @@ namespace proyecto_integrador.pantallas
                 }
             }
 
-            foreach (ServiciosAdicionales servicio in presupuesto.ServiciosAdicionales)
+            foreach (ServicioAdicionalDto servicio in presupuesto.ServiciosAdicionales)
             {
                 int indice = BuscarServicioEnCatalogo(servicio.Id);
                 if (servicio.Id > 0 && indice >= 0)
@@ -222,41 +228,45 @@ namespace proyecto_integrador.pantallas
                 }
                 else
                 {
-                    _listaServiciosPersonalizados.Items.Add(
-                        new ServiciosAdicionales(0, servicio.Descripcion, servicio.CostoDelServicio));
+                    ServicioAdicionalDto personalizado = new ServicioAdicionalDto();
+                    personalizado.Id = 0;
+                    personalizado.Descripcion = servicio.Descripcion;
+                    personalizado.CostoDelServicio = servicio.CostoDelServicio;
+                    _listaServiciosPersonalizados.Items.Add(personalizado);
                 }
             }
 
             _textoObservaciones.Text = presupuesto.Observaciones;
         }
 
-        private void selectorFecha_ValueChanged(object sender, EventArgs e)
+        private void botonAgregarMenuPrincipal_Click(object sender, EventArgs e)
         {
-            if (!_ajustandoFecha && _selectorFecha.Value.Date < DateTime.Today)
+            AgregarDetalleMenu(_menusPrincipales, ObtenerIdPrimerMenu(), TipoDeExclusionDeMenu.Ninguna);
+        }
+
+        private void botonQuitarMenuPrincipal_Click(object sender, EventArgs e)
+        {
+            QuitarFila(_grillaMenusPrincipales, _menusPrincipales);
+        }
+
+        private void botonAgregarMenuPersonalizado_Click(object sender, EventArgs e)
+        {
+            AgregarDetalleMenu(_menusPersonalizados, ObtenerIdPrimerMenu(), TipoDeExclusionDeMenu.Celiaco);
+        }
+
+        private void botonQuitarMenuPersonalizado_Click(object sender, EventArgs e)
+        {
+            QuitarFila(_grillaMenusPersonalizados, _menusPersonalizados);
+        }
+
+        private int ObtenerIdPrimerMenu()
+        {
+            if (_catalogoMenus.Count == 0)
             {
-                _ajustandoFecha = true;
-                MessageBox.Show(
-                    "Estás seleccionando una fecha que no tiene validez en torno al contexto actual. Solo se pueden elegir fechas actuales o a futuro.",
-                    "Fecha no válida",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                _selectorFecha.Value = DateTime.Today;
-                _ajustandoFecha = false;
+                return 0;
             }
 
-            ActualizarTotal();
-        }
-
-        private void AgregarMenuPrincipal()
-        {
-            int menuId = _catalogoMenus.Count == 0 ? 0 : _catalogoMenus[0].Id;
-            AgregarDetalleMenu(_menusPrincipales, menuId, TipoDeExclusionDeMenu.Ninguna);
-        }
-
-        private void AgregarMenuPersonalizado()
-        {
-            int menuId = _catalogoMenus.Count == 0 ? 0 : _catalogoMenus[0].Id;
-            AgregarDetalleMenu(_menusPersonalizados, menuId, TipoDeExclusionDeMenu.Celiaco);
+            return _catalogoMenus[0].Id;
         }
 
         private void AgregarDetalleMenu(BindingList<DetalleMenuDto> lista, int menuId, TipoDeExclusionDeMenu particularidad)
@@ -289,7 +299,7 @@ namespace proyecto_integrador.pantallas
         {
             foreach (object item in _comboSalon.Items)
             {
-                Salon salon = item as Salon;
+                SalonDto salon = item as SalonDto;
                 if (salon != null && salon.Id == id)
                 {
                     _comboSalon.SelectedItem = item;
@@ -302,7 +312,7 @@ namespace proyecto_integrador.pantallas
         {
             for (int indice = 0; indice < _listaServiciosDisponibles.Items.Count; indice++)
             {
-                ServiciosAdicionales servicio = _listaServiciosDisponibles.Items[indice] as ServiciosAdicionales;
+                ServicioAdicionalDto servicio = _listaServiciosDisponibles.Items[indice] as ServicioAdicionalDto;
                 if (servicio != null && servicio.Id == id)
                 {
                     return indice;
@@ -314,18 +324,26 @@ namespace proyecto_integrador.pantallas
 
         private void ActualizarUbicacion()
         {
-            Salon salon = _comboSalon.SelectedItem as Salon;
-            _textoUbicacion.Text = salon == null ? string.Empty : salon.Ubicacion;
+            SalonDto salon = _comboSalon.SelectedItem as SalonDto;
+            if (salon == null)
+            {
+                _textoUbicacion.Text = string.Empty;
+            }
+            else
+            {
+                _textoUbicacion.Text = salon.Ubicacion;
+            }
         }
 
+        // El cálculo lo hace el Service; la vista solo muestra el resultado.
         private void ActualizarTotal()
         {
             ActualizarAsignacionMenuPrincipalUnico();
-            int presupuestoExistenteId = _presupuestoOriginal == null ? 0 : _presupuestoOriginal.Id;
-            decimal total = _controller.CalcularEstimacion(CrearSolicitud(), presupuestoExistenteId);
+            decimal total = _controller.CalcularEstimacion(CrearSolicitud(), ObtenerIdPresupuestoOriginal());
             _etiquetaTotal.Text = "Total estimado: " + total.ToString("C2", CultureInfo.CurrentCulture);
         }
 
+        // Con un único menú principal, las cantidades las reparte el Service (invitados que no comen menús especiales).
         private void ActualizarAsignacionMenuPrincipalUnico()
         {
             bool asignacionAutomatica = _menusPrincipales.Count == 1;
@@ -358,23 +376,33 @@ namespace proyecto_integrador.pantallas
 
         private void botonAgregarServicio_Click(object sender, EventArgs e)
         {
-            string descripcion = _textoServicioPersonalizado.Text.Trim();
             decimal monto;
-            if (string.IsNullOrWhiteSpace(descripcion))
+            if (!decimal.TryParse(_textoCostoPersonalizado.Text.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out monto))
             {
-                MostrarError("Ingresá la descripción del servicio personalizado.");
-                _textoServicioPersonalizado.Focus();
-                return;
-            }
-
-            if (!decimal.TryParse(_textoCostoPersonalizado.Text.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out monto) || monto < 0)
-            {
-                MostrarError("Ingresá un monto fijo válido y mayor o igual a cero.");
+                MostrarError("Ingresá un monto fijo válido.");
                 _textoCostoPersonalizado.Focus();
                 return;
             }
 
-            _listaServiciosPersonalizados.Items.Add(new ServiciosAdicionales(0, descripcion, monto));
+            string descripcion = _textoServicioPersonalizado.Text.Trim();
+
+            // Las reglas (descripción obligatoria, monto >= 0) las valida el Service.
+            try
+            {
+                _controller.ValidarServicioPersonalizado(descripcion, monto);
+            }
+            catch (ArgumentException ex)
+            {
+                MostrarError(ex.Message);
+                _textoServicioPersonalizado.Focus();
+                return;
+            }
+
+            ServicioAdicionalDto servicio = new ServicioAdicionalDto();
+            servicio.Id = 0;
+            servicio.Descripcion = descripcion;
+            servicio.CostoDelServicio = monto;
+            _listaServiciosPersonalizados.Items.Add(servicio);
             _textoServicioPersonalizado.Clear();
             _textoCostoPersonalizado.Clear();
             ActualizarTotal();
@@ -397,9 +425,16 @@ namespace proyecto_integrador.pantallas
                 _grillaMenusPrincipales.EndEdit();
                 _grillaMenusPersonalizados.EndEdit();
                 PresupuestoRequestDto solicitud = CrearSolicitud();
-                Presupuesto presupuestoGuardado = _presupuestoOriginal == null
-                    ? _controller.Crear(solicitud)
-                    : _controller.Modificar(_presupuestoOriginal.Id, solicitud);
+
+                PresupuestoDto presupuestoGuardado;
+                if (_presupuestoOriginal == null)
+                {
+                    presupuestoGuardado = _controller.Crear(solicitud);
+                }
+                else
+                {
+                    presupuestoGuardado = _controller.Modificar(_presupuestoOriginal.Id, solicitud);
+                }
 
                 string mensaje = "Se terminó el presupuesto #"
                     + presupuestoGuardado.Id.ToString(CultureInfo.InvariantCulture)
@@ -421,9 +456,10 @@ namespace proyecto_integrador.pantallas
             }
         }
 
+        // Arma el DTO con lo que hay en pantalla. No decide nada: el Service depura y valida.
         private PresupuestoRequestDto CrearSolicitud()
         {
-            Salon salon = _comboSalon.SelectedItem as Salon;
+            SalonDto salon = _comboSalon.SelectedItem as SalonDto;
             PresupuestoRequestDto solicitud = new PresupuestoRequestDto();
             solicitud.NombreContacto = _textoNombreContacto.Text;
             solicitud.EmailContacto = _textoEmail.Text;
@@ -437,24 +473,25 @@ namespace proyecto_integrador.pantallas
             solicitud.CantidadNinos = decimal.ToInt32(_numeroNinos.Value);
             solicitud.PorcentajeAdicionalMenuPrincipal = _porcentajeMenuPrincipal.Value;
             solicitud.PorcentajeAdicionalMenuPersonalizado = _porcentajeMenuPersonalizado.Value;
-            solicitud.SalonId = salon == null ? 0 : salon.Id;
+            solicitud.SalonId = 0;
+            if (salon != null)
+            {
+                solicitud.SalonId = salon.Id;
+            }
 
             foreach (DetalleMenuDto detalle in _menusPrincipales)
             {
-                if (_menusPrincipales.Count != 1 || detalle.CantidadAdultos + detalle.CantidadNinos > 0)
-                {
-                    solicitud.Menues.Add(CopiarDetalleMenu(detalle, TipoDeExclusionDeMenu.Ninguna));
-                }
+                solicitud.Menues.Add(detalle);
             }
 
             foreach (DetalleMenuDto detalle in _menusPersonalizados)
             {
-                solicitud.Menues.Add(CopiarDetalleMenu(detalle, detalle.Particularidad));
+                solicitud.Menues.Add(detalle);
             }
 
             foreach (object item in _listaServiciosDisponibles.CheckedItems)
             {
-                ServiciosAdicionales servicio = item as ServiciosAdicionales;
+                ServicioAdicionalDto servicio = item as ServicioAdicionalDto;
                 if (servicio != null)
                 {
                     solicitud.ServiciosAdicionalesIds.Add(servicio.Id);
@@ -463,7 +500,7 @@ namespace proyecto_integrador.pantallas
 
             foreach (object item in _listaServiciosPersonalizados.Items)
             {
-                ServiciosAdicionales servicio = item as ServiciosAdicionales;
+                ServicioAdicionalDto servicio = item as ServicioAdicionalDto;
                 if (servicio != null)
                 {
                     ServicioPersonalizadoDto servicioDto = new ServicioPersonalizadoDto();
@@ -476,20 +513,9 @@ namespace proyecto_integrador.pantallas
             return solicitud;
         }
 
-        private static DetalleMenuDto CopiarDetalleMenu(DetalleMenuDto detalle, TipoDeExclusionDeMenu particularidad)
-        {
-            DetalleMenuDto copia = new DetalleMenuDto();
-            copia.MenuId = detalle.MenuId;
-            copia.CantidadAdultos = detalle.CantidadAdultos;
-            copia.CantidadNinos = detalle.CantidadNinos;
-            copia.Particularidad = particularidad;
-            return copia;
-        }
-
         private void MostrarError(string mensaje)
         {
             MessageBox.Show(mensaje, "Datos incorrectos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
-
     }
 }

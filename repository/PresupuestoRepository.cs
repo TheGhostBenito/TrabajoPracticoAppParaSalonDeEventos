@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using proyecto_integrador.models;
 
 namespace proyecto_integrador.repository
 {
-    public sealed class PresupuestoRepository
+    // Singleton: mantiene la lista de presupuestos activa durante toda la ejecución del programa.
+    public sealed class PresupuestoRepository : IPresupuestoRepository
     {
         private static readonly PresupuestoRepository instancia = new PresupuestoRepository();
         private readonly List<Presupuesto> _presupuestos;
@@ -22,14 +22,29 @@ namespace proyecto_integrador.repository
             get { return instancia; }
         }
 
+        // Devuelve primero los más nuevos: se recorre la lista de atrás para adelante.
         public List<Presupuesto> ObtenerTodos()
         {
-            return _presupuestos.OrderByDescending(presupuesto => presupuesto.FechaCreacion).ToList();
+            List<Presupuesto> resultado = new List<Presupuesto>();
+            for (int indice = _presupuestos.Count - 1; indice >= 0; indice--)
+            {
+                resultado.Add(_presupuestos[indice]);
+            }
+
+            return resultado;
         }
 
         public Presupuesto ObtenerPorId(int id)
         {
-            return _presupuestos.FirstOrDefault(presupuesto => presupuesto.Id == id);
+            foreach (Presupuesto presupuesto in _presupuestos)
+            {
+                if (presupuesto.Id == id)
+                {
+                    return presupuesto;
+                }
+            }
+
+            return null;
         }
 
         public Presupuesto Agregar(Presupuesto presupuesto)
@@ -52,14 +67,16 @@ namespace proyecto_integrador.repository
                 throw new ArgumentNullException("presupuesto");
             }
 
-            int indice = _presupuestos.FindIndex(actual => actual.Id == presupuesto.Id);
-            if (indice < 0)
+            for (int indice = 0; indice < _presupuestos.Count; indice++)
             {
-                return false;
+                if (_presupuestos[indice].Id == presupuesto.Id)
+                {
+                    _presupuestos[indice] = presupuesto;
+                    return true;
+                }
             }
 
-            _presupuestos[indice] = presupuesto;
-            return true;
+            return false;
         }
     }
 }

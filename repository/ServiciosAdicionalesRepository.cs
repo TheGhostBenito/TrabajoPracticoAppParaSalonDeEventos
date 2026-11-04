@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using proyecto_integrador.models; // Llama y accede a la clase ServicioAdicional. Que se encuentra dentro de model
-
+using proyecto_integrador.models;
 
 namespace proyecto_integrador.repository
 {
-    public sealed class ServiciosAdicionalesRepository
+    // Singleton: una única instancia que guarda la lista de servicios adicionales mientras la app está abierta.
+    public sealed class ServiciosAdicionalesRepository : IServiciosAdicionalesRepository
     {
         private static readonly ServiciosAdicionalesRepository instancia = new ServiciosAdicionalesRepository();
-        private readonly List<ServiciosAdicionales> _servicios = new List<ServiciosAdicionales>();
+        private readonly List<ServiciosAdicionales> _servicios;
+        private int _proximoId;
 
         private ServiciosAdicionalesRepository()
         {
+            _servicios = new List<ServiciosAdicionales>();
+            _proximoId = 1;
         }
 
         public static ServiciosAdicionalesRepository Instance
@@ -24,36 +24,57 @@ namespace proyecto_integrador.repository
 
         public List<ServiciosAdicionales> ObtenerTodos()
         {
-            return _servicios.ToList();
+            return new List<ServiciosAdicionales>(_servicios);
+        }
+
+        public ServiciosAdicionales ObtenerPorId(int id)
+        {
+            foreach (ServiciosAdicionales servicio in _servicios)
+            {
+                if (servicio.Id == id)
+                {
+                    return servicio;
+                }
+            }
+
+            return null;
         }
 
         public void Crear(ServiciosAdicionales servicio)
         {
-            servicio.Id = _servicios.Any() ? _servicios.Max(s => s.Id) + 1 : 1;
-            _servicios.Add(servicio);
-        }
-
-        public bool Eliminar(int id)
-        {
-            ServiciosAdicionales servicio = _servicios.FirstOrDefault(s => s.Id == id);
-            if (servicio != null)
+            if (servicio == null)
             {
-                _servicios.Remove(servicio);
-                return true;
+                throw new ArgumentNullException("servicio");
             }
-            return false;
+
+            servicio.Id = _proximoId;
+            _proximoId++;
+            _servicios.Add(servicio);
         }
 
         public bool Modificar(ServiciosAdicionales servicio)
         {
-            ServiciosAdicionales existente = _servicios.FirstOrDefault(s => s.Id == servicio.Id);
-            if (existente != null)
+            ServiciosAdicionales existente = ObtenerPorId(servicio.Id);
+            if (existente == null)
             {
-                existente.Descripcion = servicio.Descripcion;
-                existente.CostoDelServicio = servicio.CostoDelServicio;
-                return true;
+                return false;
             }
-            return false;
+
+            existente.Descripcion = servicio.Descripcion;
+            existente.CostoDelServicio = servicio.CostoDelServicio;
+            return true;
+        }
+
+        public bool Eliminar(int id)
+        {
+            ServiciosAdicionales existente = ObtenerPorId(id);
+            if (existente == null)
+            {
+                return false;
+            }
+
+            _servicios.Remove(existente);
+            return true;
         }
     }
 }
