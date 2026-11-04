@@ -1,85 +1,83 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// repositorio encargado de almacenar los menús en memoria.
+// rmplementa Singleton para mantener una única lista durante la ejecución.
 using proyecto_integrador.models;
+using proyecto_integrador.repository;
+using System;
+using System.Collections.Generic;
 
-namespace proyecto_integrador.repository
+public sealed class MenuRepository : IMenuRepository
 {
-    // Singleton: una única instancia que guarda la lista de menús mientras la app está abierta.
-    public sealed class MenuRepository : IMenuRepository
+    // unica instancia del repositorio
+    private static readonly MenuRepository instancia = new MenuRepository();
+
+    // lista donde se guardan los menús
+    private readonly List<MenuDeComida> _menus;
+
+    private int _proximoId;
+
+    // constructor privado para evitar crear nuevas instancias
+    private MenuRepository()
     {
-        private static readonly MenuRepository instancia = new MenuRepository();
-        private readonly List<MenuDeComida> _menus;
-        private int _proximoId;
+        // los menus de ejemplo cargados al iniciar la aplicación
+        _menus = new List<MenuDeComida>();
+        _menus.Add(new MenuDeComida(1, "Menu A", 50.00m, 30.00m));
+        _menus.Add(new MenuDeComida(2, "Menu B", 75.00m, 45.00m));
+        _menus.Add(new MenuDeComida(3, "Menu C", 100.00m, 60.00m));
 
-        private MenuRepository()
-        {
-            // Menús de ejemplo para tener algo en la grilla
-            _menus = new List<MenuDeComida>();
-            _menus.Add(new MenuDeComida(1, "Menu A", 50.00m, 30.00m));
-            _menus.Add(new MenuDeComida(2, "Menu B", 75.00m, 45.00m));
-            _menus.Add(new MenuDeComida(3, "Menu C", 100.00m, 60.00m));
-            _proximoId = 4;
-        }
-
-        public static MenuRepository Instance
-        {
-            get { return instancia; }
-        }
-
-        public List<MenuDeComida> ObtenerTodos()
-        {
-            return new List<MenuDeComida>(_menus);
-        }
-
-        public MenuDeComida ObtenerPorId(int id)
-        {
-            foreach (MenuDeComida menu in _menus)
-            {
-                if (menu.Id == id)
-                {
-                    return menu;
-                }
-            }
-
-            return null;
-        }
-
-        public void Crear(MenuDeComida menu)
-        {
-            if (menu == null)
-            {
-                throw new ArgumentNullException("menu");
-            }
-
-            menu.Id = _proximoId;
-            _proximoId++;
-            _menus.Add(menu);
-        }
-
-        public bool Modificar(MenuDeComida menu)
-        {
-            MenuDeComida existente = ObtenerPorId(menu.Id);
-            if (existente == null)
-            {
-                return false;
-            }
-
-            existente.Nombre = menu.Nombre;
-            existente.CostoPorAdulto = menu.CostoPorAdulto;
-            existente.CostoPorNiño = menu.CostoPorNiño;
-            return true;
-        }
-
-        public bool Eliminar(int id)
-        {
-            MenuDeComida existente = ObtenerPorId(id);
-            if (existente == null)
-            {
-                return false;
-            }
-
-            _menus.Remove(existente);
-            return true;
-        }
+        // Próximo ID disponible
+        _proximoId = 4;
     }
-}
+
+    // permite acceder a la única instancia del repositorio
+    public static MenuRepository Instance
+    {
+        get { return instancia; }
+    }
+
+    // devuelve una copia de la lista de menus
+    public List<MenuDeComida> ObtenerTodos()
+    {
+        return new List<MenuDeComida>(_menus);
+    }
+
+    // busca un menú según su id
+    public MenuDeComida ObtenerPorId(int id)
+    {
+        foreach (MenuDeComida menu in _menus)
+        {
+            if (menu.Id == id)
+            {
+                return menu;
+            }
+        }
+
+        return null;
+    }
+
+    // agrega  nuevo menú a la colección
+    public void Crear(MenuDeComida menu)
+    {
+        if (menu == null)
+        {
+            throw new ArgumentNullException("menu");
+        }
+
+        // asigna un id nico al menu
+        menu.Id = _proximoId;
+
+        _proximoId++;
+
+        // guarda el menú en la lista
+        _menus.Add(menu);
+    }
+
+    // Modifica los datos de un menú existente
+    public bool Modificar(MenuDeComida menu)
+    {
+        // Busca el menú por su ID
+        MenuDeComida existente = ObtenerPorId(menu.Id);
+
+        if (existente == null)
+        {
+            return false;
+        }
