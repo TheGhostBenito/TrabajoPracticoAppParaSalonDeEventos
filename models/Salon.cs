@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace proyecto_integrador.models
 {
@@ -24,6 +21,7 @@ namespace proyecto_integrador.models
         public int Id
         {
             get { return id; }
+            set { id = value; }
         }
 
         public string Nombre

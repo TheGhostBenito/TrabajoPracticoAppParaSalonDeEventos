@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace proyecto_integrador.models
@@ -148,22 +148,52 @@ namespace proyecto_integrador.models
                 throw new ArgumentNullException("serviciosAdicionales");
             }
 
+            if (nombreContacto == null)
+            {
+                nombreContacto = string.Empty;
+            }
+
+            if (emailContacto == null)
+            {
+                emailContacto = string.Empty;
+            }
+
+            if (telefonoContacto == null)
+            {
+                telefonoContacto = string.Empty;
+            }
+
+            if (ubicacionEvento == null)
+            {
+                ubicacionEvento = string.Empty;
+            }
+
+            if (observaciones == null)
+            {
+                observaciones = string.Empty;
+            }
+
+            if (rutaPdf == null)
+            {
+                rutaPdf = string.Empty;
+            }
+
             Id = id;
             FechaCreacion = fechaCreacion;
             FechaEvento = fechaEvento;
             HoraInicio = horaInicio;
-            NombreContacto = nombreContacto ?? string.Empty;
-            EmailContacto = emailContacto ?? string.Empty;
-            TelefonoContacto = telefonoContacto ?? string.Empty;
-            UbicacionEvento = ubicacionEvento ?? string.Empty;
-            Observaciones = observaciones ?? string.Empty;
+            NombreContacto = nombreContacto;
+            EmailContacto = emailContacto;
+            TelefonoContacto = telefonoContacto;
+            UbicacionEvento = ubicacionEvento;
+            Observaciones = observaciones;
             Evento = evento;
             SalonDelEvento = salon;
             Menues = new List<DetalleDeMenus>(menues);
             ServiciosAdicionales = new List<ServiciosAdicionales>(serviciosAdicionales);
             PorcentajeAdicionalMenuPrincipal = porcentajeAdicionalMenuPrincipal;
             PorcentajeAdicionalMenuPersonalizado = porcentajeAdicionalMenuPersonalizado;
-            RutaPdf = rutaPdf ?? string.Empty;
+            RutaPdf = rutaPdf;
         }
     }
 }

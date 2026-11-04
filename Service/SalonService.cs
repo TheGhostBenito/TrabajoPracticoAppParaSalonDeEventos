@@ -1,62 +1,87 @@
 ﻿using System;
-
 using System.Collections.Generic;
+using proyecto_integrador.dto;
 using proyecto_integrador.models;
 using proyecto_integrador.repository;
 
-namespace proyecto_integrador.service
+namespace proyecto_integrador.Service
 {
-    public static class SalonService
+    public class SalonService : ISalonService
     {
-        public static List<Salon> ObtenerSalones()
-        {
-            return SalonRepository.ObtenerSalones();
-        }
+        private readonly ISalonRepository _repo;
 
-        public static Salon CrearSalon(string nombre, string ubicacion, decimal costoBase)
+        public SalonService(ISalonRepository repo)
         {
-            Validar(nombre, ubicacion, costoBase);
-            return SalonRepository.AgregarSalon(nombre.Trim(), ubicacion.Trim(), costoBase);
-        }
-
-        public static void ModificarSalon(Salon salon, string nombre, string ubicacion, decimal costoBase)
-        {
-            if (salon == null)
+            if (repo == null)
             {
-                throw new ArgumentNullException("salon", "No hay un salón seleccionado.");
+                throw new ArgumentNullException("repo");
             }
 
-            Validar(nombre, ubicacion, costoBase);
-            SalonRepository.ModificarSalon(salon, nombre.Trim(), ubicacion.Trim(), costoBase);
+            _repo = repo;
         }
 
-        public static void EliminarSalon(Salon salon)
+        public List<SalonDto> ObtenerTodos()
         {
-            if (salon == null)
+            List<SalonDto> resultado = new List<SalonDto>();
+            foreach (Salon salon in _repo.ObtenerTodos())
             {
-                throw new ArgumentNullException("salon", "No hay un salón seleccionado.");
+                resultado.Add(ConvertirADto(salon));
             }
 
-            SalonRepository.EliminarSalon(salon);
+            return resultado;
+        }
+
+        public void Crear(SalonDto salon)
+        {
+            Validar(salon);
+            Salon nuevo = new Salon(0, salon.Nombre.Trim(), salon.Ubicacion.Trim(), salon.CostoBase);
+            _repo.Crear(nuevo);
+        }
+
+        public bool Modificar(SalonDto salon)
+        {
+            Validar(salon);
+            Salon modificado = new Salon(salon.Id, salon.Nombre.Trim(), salon.Ubicacion.Trim(), salon.CostoBase);
+            return _repo.Modificar(modificado);
+        }
+
+        public bool Eliminar(int id)
+        {
+            return _repo.Eliminar(id);
         }
 
         // Reglas de negocio: si algo no se cumple, se lanza una excepción con el mensaje para el usuario
-        private static void Validar(string nombre, string ubicacion, decimal costoBase)
+        private void Validar(SalonDto salon)
         {
-            if (string.IsNullOrWhiteSpace(nombre))
+            if (salon == null)
+            {
+                throw new ArgumentNullException("salon");
+            }
+
+            if (string.IsNullOrWhiteSpace(salon.Nombre))
             {
                 throw new ArgumentException("Ingresá el nombre del salón.");
             }
 
-            if (string.IsNullOrWhiteSpace(ubicacion))
+            if (string.IsNullOrWhiteSpace(salon.Ubicacion))
             {
                 throw new ArgumentException("Ingresá la ubicación del salón.");
             }
 
-            if (costoBase < 0)
+            if (salon.CostoBase < 0)
             {
                 throw new ArgumentException("El monto tiene que ser mayor o igual a 0.");
             }
+        }
+
+        private SalonDto ConvertirADto(Salon salon)
+        {
+            SalonDto dto = new SalonDto();
+            dto.Id = salon.Id;
+            dto.Nombre = salon.Nombre;
+            dto.Ubicacion = salon.Ubicacion;
+            dto.CostoBase = salon.CostoBase;
+            return dto;
         }
     }
 }

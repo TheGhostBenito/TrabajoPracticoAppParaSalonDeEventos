@@ -1,28 +1,36 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Mail;
 using proyecto_integrador.dto;
 using proyecto_integrador.models;
 using proyecto_integrador.repository;
-using proyecto_integrador.service;
 
 namespace proyecto_integrador.Service
 {
-    public class PresupuestoService
+    public class PresupuestoService : IPresupuestoService
     {
-        private readonly PresupuestoRepository _presupuestoRepository;
-        private readonly MenuRepository _menuRepository;
-        private readonly ServiciosAdicionalesRepository _serviciosRepository;
+        // Depende de INTERFACES, no de las clases concretas: así se puede cambiar el repositorio sin tocar este service.
+        private readonly IPresupuestoRepository _presupuestoRepository;
+        private readonly ISalonRepository _salonRepository;
+        private readonly IMenuRepository _menuRepository;
+        private readonly IServiciosAdicionalesRepository _serviciosRepository;
+        private readonly IPresupuestoPdfService _pdfService;
 
         public PresupuestoService(
-            PresupuestoRepository presupuestoRepository,
-            MenuRepository menuRepository,
-            ServiciosAdicionalesRepository serviciosRepository)
+            IPresupuestoRepository presupuestoRepository,
+            ISalonRepository salonRepository,
+            IMenuRepository menuRepository,
+            IServiciosAdicionalesRepository serviciosRepository,
+            IPresupuestoPdfService pdfService)
         {
             if (presupuestoRepository == null)
             {
                 throw new ArgumentNullException("presupuestoRepository");
+            }
+
+            if (salonRepository == null)
+            {
+                throw new ArgumentNullException("salonRepository");
             }
 
             if (menuRepository == null)
@@ -35,20 +43,126 @@ namespace proyecto_integrador.Service
                 throw new ArgumentNullException("serviciosRepository");
             }
 
+            if (pdfService == null)
+            {
+                throw new ArgumentNullException("pdfService");
+            }
+
             _presupuestoRepository = presupuestoRepository;
+            _salonRepository = salonRepository;
             _menuRepository = menuRepository;
             _serviciosRepository = serviciosRepository;
+            _pdfService = pdfService;
         }
 
-        public List<Presupuesto> ObtenerTodos()
+        // ---------- Consultas ----------
+
+        public List<PresupuestoDto> ObtenerTodos()
         {
-            return _presupuestoRepository.ObtenerTodos();
+            List<PresupuestoDto> resultado = new List<PresupuestoDto>();
+            foreach (Presupuesto presupuesto in _presupuestoRepository.ObtenerTodos())
+            {
+                resultado.Add(ConvertirADto(presupuesto));
+            }
+
+            return resultado;
         }
 
-        public Presupuesto ObtenerPorId(int id)
+        // Salones para elegir. Si se está modificando un presupuesto, se incluye el salón que ya tenía aunque se haya borrado.
+        public List<SalonDto> ObtenerSalonesDisponibles(int presupuestoId)
         {
-            return _presupuestoRepository.ObtenerPorId(id);
+            List<SalonDto> resultado = new List<SalonDto>();
+            foreach (Salon salon in _salonRepository.ObtenerTodos())
+            {
+                resultado.Add(ConvertirSalonADto(salon));
+            }
+
+            Presupuesto existente = _presupuestoRepository.ObtenerPorId(presupuestoId);
+            if (existente != null)
+            {
+                bool yaEstaEnLaLista = false;
+                foreach (SalonDto salonDto in resultado)
+                {
+                    if (salonDto.Id == existente.SalonDelEvento.Id)
+                    {
+                        yaEstaEnLaLista = true;
+                    }
+                }
+
+                if (!yaEstaEnLaLista)
+                {
+                    resultado.Add(ConvertirSalonADto(existente.SalonDelEvento));
+                }
+            }
+
+            return resultado;
         }
+
+        public List<MenuDto> ObtenerMenusDisponibles(int presupuestoId)
+        {
+            List<MenuDto> resultado = new List<MenuDto>();
+            foreach (MenuDeComida menu in _menuRepository.ObtenerTodos())
+            {
+                resultado.Add(ConvertirMenuADto(menu));
+            }
+
+            Presupuesto existente = _presupuestoRepository.ObtenerPorId(presupuestoId);
+            if (existente != null)
+            {
+                foreach (DetalleDeMenus detalle in existente.Menues)
+                {
+                    bool yaEstaEnLaLista = false;
+                    foreach (MenuDto menuDto in resultado)
+                    {
+                        if (menuDto.Id == detalle.MenuElegido.Id)
+                        {
+                            yaEstaEnLaLista = true;
+                        }
+                    }
+
+                    if (!yaEstaEnLaLista)
+                    {
+                        resultado.Add(ConvertirMenuADto(detalle.MenuElegido));
+                    }
+                }
+            }
+
+            return resultado;
+        }
+
+        public List<ServicioAdicionalDto> ObtenerServiciosDisponibles(int presupuestoId)
+        {
+            List<ServicioAdicionalDto> resultado = new List<ServicioAdicionalDto>();
+            foreach (ServiciosAdicionales servicio in _serviciosRepository.ObtenerTodos())
+            {
+                resultado.Add(ConvertirServicioADto(servicio));
+            }
+
+            Presupuesto existente = _presupuestoRepository.ObtenerPorId(presupuestoId);
+            if (existente != null)
+            {
+                foreach (ServiciosAdicionales servicio in existente.ServiciosAdicionales)
+                {
+                    bool yaEstaEnLaLista = false;
+                    foreach (ServicioAdicionalDto servicioDto in resultado)
+                    {
+                        if (servicioDto.Id == servicio.Id)
+                        {
+                            yaEstaEnLaLista = true;
+                        }
+                    }
+
+                    if (servicio.Id > 0 && !yaEstaEnLaLista)
+                    {
+                        resultado.Add(ConvertirServicioADto(servicio));
+                    }
+                }
+            }
+
+            return resultado;
+        }
+
+        // ---------- Cálculos ----------
 
         public AsignacionMenuDto CalcularInvitadosRestantes(
             int cantidadAdultos,
@@ -83,9 +197,14 @@ namespace proyecto_integrador.Service
                 return 0m;
             }
 
-            Presupuesto existente = presupuestoExistenteId > 0
-                ? _presupuestoRepository.ObtenerPorId(presupuestoExistenteId)
-                : null;
+            DepurarMenus(solicitud);
+
+            Presupuesto existente = null;
+            if (presupuestoExistenteId > 0)
+            {
+                existente = _presupuestoRepository.ObtenerPorId(presupuestoExistenteId);
+            }
+
             decimal costoSalon = 0m;
             Salon salon = BuscarSalon(solicitud.SalonId, existente);
             if (salon != null && solicitud.DuracionHoras > 0)
@@ -137,18 +256,12 @@ namespace proyecto_integrador.Service
         private decimal CalcularCostoServiciosEstimados(PresupuestoRequestDto solicitud, Presupuesto existente)
         {
             decimal subtotal = 0m;
-            List<ServiciosAdicionales> catalogo = _serviciosRepository.ObtenerTodos();
 
             if (solicitud.ServiciosAdicionalesIds != null)
             {
-                foreach (int servicioId in solicitud.ServiciosAdicionalesIds.Distinct())
+                foreach (int servicioId in QuitarRepetidos(solicitud.ServiciosAdicionalesIds))
                 {
-                    ServiciosAdicionales servicio = catalogo.FirstOrDefault(item => item.Id == servicioId);
-                    if (servicio == null && existente != null)
-                    {
-                        servicio = existente.ServiciosAdicionales.FirstOrDefault(item => item.Id == servicioId);
-                    }
-
+                    ServiciosAdicionales servicio = BuscarServicio(servicioId, existente);
                     if (servicio != null)
                     {
                         subtotal += servicio.CostoDelServicio;
@@ -170,15 +283,18 @@ namespace proyecto_integrador.Service
             return subtotal;
         }
 
-        public Presupuesto Crear(PresupuestoRequestDto solicitud)
+        // ---------- Alta, modificación y PDF ----------
+
+        public PresupuestoDto Crear(PresupuestoRequestDto solicitud)
         {
+            DepurarMenus(solicitud);
             Validar(solicitud, null);
-            Presupuesto presupuesto = ConstruirPresupuesto(solicitud, 0, DateTime.Now, null, string.Empty);
+            Presupuesto presupuesto = ConstruirPresupuesto(solicitud, 0, DateTime.Now, null);
             _presupuestoRepository.Agregar(presupuesto);
-            return presupuesto;
+            return ConvertirADto(presupuesto);
         }
 
-        public Presupuesto Modificar(int id, PresupuestoRequestDto solicitud)
+        public PresupuestoDto Modificar(int id, PresupuestoRequestDto solicitud)
         {
             Presupuesto existente = _presupuestoRepository.ObtenerPorId(id);
             if (existente == null)
@@ -186,20 +302,16 @@ namespace proyecto_integrador.Service
                 throw new ArgumentException("No se encontró el presupuesto seleccionado.");
             }
 
+            DepurarMenus(solicitud);
             Validar(solicitud, existente);
-            Presupuesto modificado = ConstruirPresupuesto(
-                solicitud,
-                existente.Id,
-                existente.FechaCreacion,
-                existente,
-                string.Empty);
+            Presupuesto modificado = ConstruirPresupuesto(solicitud, existente.Id, existente.FechaCreacion, existente);
 
             if (!_presupuestoRepository.Actualizar(modificado))
             {
                 throw new InvalidOperationException("No se pudo actualizar el presupuesto.");
             }
 
-            return modificado;
+            return ConvertirADto(modificado);
         }
 
         public string ExportarPdf(int presupuestoId, string ruta)
@@ -210,16 +322,30 @@ namespace proyecto_integrador.Service
                 throw new ArgumentException("No se encontró el presupuesto seleccionado.");
             }
 
-            presupuesto.RutaPdf = PresupuestoPdfService.Guardar(presupuesto, ruta);
+            presupuesto.RutaPdf = _pdfService.Guardar(presupuesto, ruta);
             return presupuesto.RutaPdf;
         }
+
+        public void ValidarServicioPersonalizado(string descripcion, decimal monto)
+        {
+            if (string.IsNullOrWhiteSpace(descripcion))
+            {
+                throw new ArgumentException("Cada servicio personalizado debe tener una descripción.");
+            }
+
+            if (monto < 0)
+            {
+                throw new ArgumentException("El costo de un servicio personalizado no puede ser negativo.");
+            }
+        }
+
+        // ---------- Construcción del modelo ----------
 
         private Presupuesto ConstruirPresupuesto(
             PresupuestoRequestDto solicitud,
             int id,
             DateTime fechaCreacion,
-            Presupuesto existente,
-            string rutaPdf)
+            Presupuesto existente)
         {
             Salon salonSeleccionado = BuscarSalon(solicitud.SalonId, existente);
             Evento evento = new Evento(
@@ -257,8 +383,31 @@ namespace proyecto_integrador.Service
                 serviciosSeleccionados,
                 solicitud.PorcentajeAdicionalMenuPrincipal,
                 solicitud.PorcentajeAdicionalMenuPersonalizado,
-                rutaPdf);
+                string.Empty);
         }
+
+        private List<ServiciosAdicionales> ConstruirServicios(PresupuestoRequestDto solicitud, Presupuesto existente)
+        {
+            List<ServiciosAdicionales> servicios = new List<ServiciosAdicionales>();
+
+            foreach (int servicioId in QuitarRepetidos(solicitud.ServiciosAdicionalesIds))
+            {
+                ServiciosAdicionales servicio = BuscarServicio(servicioId, existente);
+                if (servicio != null)
+                {
+                    servicios.Add(new ServiciosAdicionales(servicio.Id, servicio.Descripcion, servicio.CostoDelServicio));
+                }
+            }
+
+            foreach (ServicioPersonalizadoDto servicio in solicitud.ServiciosPersonalizados)
+            {
+                servicios.Add(new ServiciosAdicionales(0, servicio.Descripcion.Trim(), servicio.MontoFijo));
+            }
+
+            return servicios;
+        }
+
+        // ---------- Validaciones (reglas de negocio) ----------
 
         private void Validar(PresupuestoRequestDto solicitud, Presupuesto existente)
         {
@@ -306,7 +455,15 @@ namespace proyecto_integrador.Service
                 throw new ArgumentException("Ingresá la ubicación concreta donde se realizará el evento.");
             }
 
-            int cantidadDigitosTelefono = solicitud.TelefonoContacto.Count(caracter => char.IsDigit(caracter));
+            int cantidadDigitosTelefono = 0;
+            foreach (char caracter in solicitud.TelefonoContacto)
+            {
+                if (char.IsDigit(caracter))
+                {
+                    cantidadDigitosTelefono++;
+                }
+            }
+
             if (cantidadDigitosTelefono < 7 || cantidadDigitosTelefono > 15)
             {
                 throw new ArgumentException("Ingresá un teléfono válido, con entre 7 y 15 dígitos.");
@@ -358,16 +515,14 @@ namespace proyecto_integrador.Service
                     throw new ArgumentException("Elegí una particularidad de menú válida.");
                 }
 
-                if (detalle.Particularidad != TipoDeExclusionDeMenu.Ninguna
-                    && BuscarMenu(detalle.MenuId, existente) == null)
+                if (BuscarMenu(detalle.MenuId, existente) == null)
                 {
-                    throw new ArgumentException("Seleccioná un menú para cada particularidad.");
-                }
+                    if (detalle.Particularidad == TipoDeExclusionDeMenu.Ninguna)
+                    {
+                        throw new ArgumentException("Seleccioná un menú principal para cada fila.");
+                    }
 
-                if (detalle.Particularidad == TipoDeExclusionDeMenu.Ninguna
-                    && BuscarMenu(detalle.MenuId, existente) == null)
-                {
-                    throw new ArgumentException("Seleccioná un menú principal para cada fila.");
+                    throw new ArgumentException("Seleccioná un menú para cada particularidad.");
                 }
 
                 adultosAsignados += detalle.CantidadAdultos;
@@ -379,14 +534,9 @@ namespace proyecto_integrador.Service
                 throw new ArgumentException("La suma de adultos y niños asignados a los menús debe coincidir exactamente con la cantidad total de invitados.");
             }
 
-            List<ServiciosAdicionales> catalogoServicios = _serviciosRepository.ObtenerTodos();
-            foreach (int servicioId in solicitud.ServiciosAdicionalesIds.Distinct())
+            foreach (int servicioId in QuitarRepetidos(solicitud.ServiciosAdicionalesIds))
             {
-                bool existeEnCatalogo = catalogoServicios.Any(servicio => servicio.Id == servicioId);
-                bool existeEnPresupuesto = existente != null
-                    && existente.ServiciosAdicionales.Any(servicio => servicio.Id == servicioId);
-
-                if (!existeEnCatalogo && !existeEnPresupuesto)
+                if (BuscarServicio(servicioId, existente) == null)
                 {
                     throw new ArgumentException("Uno de los servicios seleccionados ya no está disponible.");
                 }
@@ -394,21 +544,55 @@ namespace proyecto_integrador.Service
 
             foreach (ServicioPersonalizadoDto servicio in solicitud.ServiciosPersonalizados)
             {
-                if (servicio == null || string.IsNullOrWhiteSpace(servicio.Descripcion))
+                if (servicio == null)
                 {
                     throw new ArgumentException("Cada servicio personalizado debe tener una descripción.");
                 }
 
-                if (servicio.MontoFijo < 0)
-                {
-                    throw new ArgumentException("El costo de un servicio personalizado no puede ser negativo.");
-                }
+                ValidarServicioPersonalizado(servicio.Descripcion, servicio.MontoFijo);
             }
         }
 
+        // Regla de negocio: si hay un único menú principal y quedó sin invitados (porque todos
+        // comen menús con particularidad), esa fila vacía se descarta antes de validar y calcular.
+        private void DepurarMenus(PresupuestoRequestDto solicitud)
+        {
+            if (solicitud == null || solicitud.Menues == null)
+            {
+                return;
+            }
+
+            int cantidadPrincipales = 0;
+            foreach (DetalleMenuDto detalle in solicitud.Menues)
+            {
+                if (detalle != null && detalle.Particularidad == TipoDeExclusionDeMenu.Ninguna)
+                {
+                    cantidadPrincipales++;
+                }
+            }
+
+            List<DetalleMenuDto> depurados = new List<DetalleMenuDto>();
+            foreach (DetalleMenuDto detalle in solicitud.Menues)
+            {
+                bool esPrincipalUnicoVacio = detalle != null
+                    && detalle.Particularidad == TipoDeExclusionDeMenu.Ninguna
+                    && cantidadPrincipales == 1
+                    && detalle.CantidadAdultos + detalle.CantidadNinos <= 0;
+
+                if (!esPrincipalUnicoVacio)
+                {
+                    depurados.Add(detalle);
+                }
+            }
+
+            solicitud.Menues = depurados;
+        }
+
+        // ---------- Búsquedas auxiliares ----------
+
         private Salon BuscarSalon(int salonId, Presupuesto existente)
         {
-            Salon salon = SalonService.ObtenerSalones().FirstOrDefault(item => item.Id == salonId);
+            Salon salon = _salonRepository.ObtenerPorId(salonId);
             if (salon == null && existente != null && existente.SalonDelEvento.Id == salonId)
             {
                 salon = existente.SalonDelEvento;
@@ -419,55 +603,144 @@ namespace proyecto_integrador.Service
 
         private MenuDeComida BuscarMenu(int menuId, Presupuesto existente)
         {
-            MenuDeComida menu = _menuRepository.ObtenerTodos().FirstOrDefault(item => item.Id == menuId);
+            MenuDeComida menu = _menuRepository.ObtenerPorId(menuId);
             if (menu == null && existente != null)
             {
-                DetalleDeMenus detalle = existente.Menues.FirstOrDefault(item => item.MenuElegido.Id == menuId);
-                if (detalle != null)
+                foreach (DetalleDeMenus detalle in existente.Menues)
                 {
-                    menu = detalle.MenuElegido;
+                    if (detalle.MenuElegido.Id == menuId)
+                    {
+                        menu = detalle.MenuElegido;
+                        break;
+                    }
                 }
             }
 
             return menu;
         }
 
-        private List<ServiciosAdicionales> ConstruirServicios(PresupuestoRequestDto solicitud, Presupuesto existente)
+        private ServiciosAdicionales BuscarServicio(int servicioId, Presupuesto existente)
         {
-            List<ServiciosAdicionales> servicios = new List<ServiciosAdicionales>();
-            List<ServiciosAdicionales> catalogo = _serviciosRepository.ObtenerTodos();
-
-            foreach (int servicioId in solicitud.ServiciosAdicionalesIds.Distinct())
+            ServiciosAdicionales servicio = _serviciosRepository.ObtenerPorId(servicioId);
+            if (servicio == null && existente != null)
             {
-                ServiciosAdicionales servicio = catalogo.FirstOrDefault(item => item.Id == servicioId);
-                if (servicio == null && existente != null)
+                foreach (ServiciosAdicionales item in existente.ServiciosAdicionales)
                 {
-                    servicio = existente.ServiciosAdicionales.FirstOrDefault(item => item.Id == servicioId);
-                }
-
-                if (servicio != null)
-                {
-                    servicios.Add(new ServiciosAdicionales(servicio.Id, servicio.Descripcion, servicio.CostoDelServicio));
+                    if (item.Id == servicioId)
+                    {
+                        servicio = item;
+                        break;
+                    }
                 }
             }
 
-            foreach (ServicioPersonalizadoDto servicio in solicitud.ServiciosPersonalizados)
-            {
-                servicios.Add(new ServiciosAdicionales(0, servicio.Descripcion.Trim(), servicio.MontoFijo));
-            }
-
-            return servicios;
+            return servicio;
         }
 
-        private static Salon CopiarSalon(Salon salon)
+        private List<int> QuitarRepetidos(List<int> ids)
+        {
+            List<int> unicos = new List<int>();
+            foreach (int id in ids)
+            {
+                if (!unicos.Contains(id))
+                {
+                    unicos.Add(id);
+                }
+            }
+
+            return unicos;
+        }
+
+        // ---------- Copias y conversiones a DTO ----------
+
+        private Salon CopiarSalon(Salon salon)
         {
             return new Salon(salon.Id, salon.Nombre, salon.Ubicacion, salon.CostoBase);
         }
 
-        private static MenuDeComida CopiarMenu(MenuDeComida menu)
+        private MenuDeComida CopiarMenu(MenuDeComida menu)
         {
             return new MenuDeComida(menu.Id, menu.Nombre, menu.CostoPorAdulto, menu.CostoPorNiño);
         }
 
+        private SalonDto ConvertirSalonADto(Salon salon)
+        {
+            SalonDto dto = new SalonDto();
+            dto.Id = salon.Id;
+            dto.Nombre = salon.Nombre;
+            dto.Ubicacion = salon.Ubicacion;
+            dto.CostoBase = salon.CostoBase;
+            return dto;
+        }
+
+        private MenuDto ConvertirMenuADto(MenuDeComida menu)
+        {
+            MenuDto dto = new MenuDto();
+            dto.Id = menu.Id;
+            dto.Nombre = menu.Nombre;
+            dto.CostoPorAdulto = menu.CostoPorAdulto;
+            dto.CostoPorNiño = menu.CostoPorNiño;
+            return dto;
+        }
+
+        private ServicioAdicionalDto ConvertirServicioADto(ServiciosAdicionales servicio)
+        {
+            ServicioAdicionalDto dto = new ServicioAdicionalDto();
+            dto.Id = servicio.Id;
+            dto.Descripcion = servicio.Descripcion;
+            dto.CostoDelServicio = servicio.CostoDelServicio;
+            return dto;
+        }
+
+        private PresupuestoDto ConvertirADto(Presupuesto presupuesto)
+        {
+            PresupuestoDto dto = new PresupuestoDto();
+            dto.Id = presupuesto.Id;
+            dto.FechaCreacion = presupuesto.FechaCreacion;
+            dto.FechaEvento = presupuesto.FechaEvento;
+            dto.HoraInicio = presupuesto.HoraInicio;
+            dto.FechaHoraEvento = presupuesto.FechaHoraEvento;
+            dto.NombreContacto = presupuesto.NombreContacto;
+            dto.EmailContacto = presupuesto.EmailContacto;
+            dto.TelefonoContacto = presupuesto.TelefonoContacto;
+            dto.UbicacionEvento = presupuesto.UbicacionEvento;
+            dto.Observaciones = presupuesto.Observaciones;
+            dto.SalonId = presupuesto.SalonDelEvento.Id;
+            dto.NombreSalon = presupuesto.NombreSalon;
+            dto.DuracionHoras = presupuesto.Evento.Duracion;
+            dto.CantidadAdultos = presupuesto.Evento.CantidadAdultos;
+            dto.CantidadNinos = presupuesto.Evento.CantidadNinos;
+            dto.CantidadTotalInvitados = presupuesto.CantidadTotalInvitados;
+            dto.PorcentajeAdicionalMenuPrincipal = presupuesto.PorcentajeAdicionalMenuPrincipal;
+            dto.PorcentajeAdicionalMenuPersonalizado = presupuesto.PorcentajeAdicionalMenuPersonalizado;
+            dto.CostoSalon = presupuesto.CostoSalon;
+            dto.SubtotalMenusPrincipales = presupuesto.SubtotalMenusPrincipales;
+            dto.RecargoMenusPrincipales = presupuesto.RecargoMenusPrincipales;
+            dto.SubtotalMenusPersonalizados = presupuesto.SubtotalMenusPersonalizados;
+            dto.RecargoMenusPersonalizados = presupuesto.RecargoMenusPersonalizados;
+            dto.CostoMenus = presupuesto.CostoMenus;
+            dto.CostoServiciosAdicionales = presupuesto.CostoServiciosAdicionales;
+            dto.TotalFinal = presupuesto.TotalFinal;
+            dto.RutaPdf = presupuesto.RutaPdf;
+
+            foreach (DetalleDeMenus detalle in presupuesto.Menues)
+            {
+                DetalleMenuPresupuestoDto detalleDto = new DetalleMenuPresupuestoDto();
+                detalleDto.MenuId = detalle.MenuElegido.Id;
+                detalleDto.NombreMenu = detalle.MenuElegido.Nombre;
+                detalleDto.Particularidad = detalle.ExclusionDelMenu;
+                detalleDto.CantidadAdultos = detalle.CantidadAdultos;
+                detalleDto.CantidadNinos = detalle.CantidadNinos;
+                detalleDto.Subtotal = detalle.CalcularSubtotal();
+                dto.Menues.Add(detalleDto);
+            }
+
+            foreach (ServiciosAdicionales servicio in presupuesto.ServiciosAdicionales)
+            {
+                dto.ServiciosAdicionales.Add(ConvertirServicioADto(servicio));
+            }
+
+            return dto;
+        }
     }
 }

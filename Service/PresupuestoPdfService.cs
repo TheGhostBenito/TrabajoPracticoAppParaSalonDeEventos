@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -7,11 +7,11 @@ using proyecto_integrador.models;
 
 namespace proyecto_integrador.Service
 {
-    public static class PresupuestoPdfService
+    public class PresupuestoPdfService : IPresupuestoPdfService
     {
         private const int LineasPorPagina = 48;
 
-        public static string Guardar(Presupuesto presupuesto, string ruta)
+        public string Guardar(Presupuesto presupuesto, string ruta)
         {
             if (presupuesto == null)
             {
@@ -30,7 +30,7 @@ namespace proyecto_integrador.Service
             return rutaCompleta;
         }
 
-        private static byte[] CrearPdf(Presupuesto presupuesto)
+        private byte[] CrearPdf(Presupuesto presupuesto)
         {
             List<string> lineas = CrearLineas(presupuesto);
             List<byte[]> contenidoPaginas = new List<byte[]>();
@@ -123,7 +123,7 @@ namespace proyecto_integrador.Service
             }
         }
 
-        private static List<string> CrearLineas(Presupuesto presupuesto)
+        private List<string> CrearLineas(Presupuesto presupuesto)
         {
             List<string> lineas = new List<string>();
             AgregarLineaEnRenglones(lineas, "PRESUPUESTO DE EVENTO #" + presupuesto.Id.ToString(CultureInfo.InvariantCulture));
@@ -143,9 +143,12 @@ namespace proyecto_integrador.Service
 
             foreach (DetalleDeMenus detalle in presupuesto.Menues)
             {
-                string exclusiones = detalle.ExclusionDelMenu == TipoDeExclusionDeMenu.Ninguna
-                    ? "menú principal"
-                    : "particularidad: " + detalle.ExclusionDelMenu.ToString();
+                string exclusiones = "menú principal";
+                if (detalle.ExclusionDelMenu != TipoDeExclusionDeMenu.Ninguna)
+                {
+                    exclusiones = "particularidad: " + detalle.ExclusionDelMenu.ToString();
+                }
+
                 string descripcion = detalle.MenuElegido.Nombre + " (" + exclusiones + "): "
                     + detalle.CantidadAdultos.ToString(CultureInfo.InvariantCulture) + " adultos, "
                     + detalle.CantidadNinos.ToString(CultureInfo.InvariantCulture) + " niños; subtotal "
@@ -191,9 +194,14 @@ namespace proyecto_integrador.Service
             return lineas;
         }
 
-        private static void AgregarLineaEnRenglones(List<string> destino, string texto)
+        private void AgregarLineaEnRenglones(List<string> destino, string texto)
         {
-            string textoEnUnaLinea = (texto ?? string.Empty).Replace('\r', ' ').Replace('\n', ' ');
+            if (texto == null)
+            {
+                texto = string.Empty;
+            }
+
+            string textoEnUnaLinea = texto.Replace('\r', ' ').Replace('\n', ' ');
             const int maximoCaracteres = 88;
 
             while (textoEnUnaLinea.Length > maximoCaracteres)
@@ -211,15 +219,20 @@ namespace proyecto_integrador.Service
             destino.Add(textoEnUnaLinea);
         }
 
-        private static string EscaparTextoPdf(string texto)
+        private string EscaparTextoPdf(string texto)
         {
-            return (texto ?? string.Empty)
-                .Replace("\\", "\\\\")
-                .Replace("(", "\\(")
-                .Replace(")", "\\)");
+            if (texto == null)
+            {
+                texto = string.Empty;
+            }
+
+            string resultado = texto.Replace("\\", "\\\\");
+            resultado = resultado.Replace("(", "\\(");
+            resultado = resultado.Replace(")", "\\)");
+            return resultado;
         }
 
-        private static byte[] Concatenar(byte[] primero, byte[] segundo, byte[] tercero)
+        private byte[] Concatenar(byte[] primero, byte[] segundo, byte[] tercero)
         {
             byte[] resultado = new byte[primero.Length + segundo.Length + tercero.Length];
             Buffer.BlockCopy(primero, 0, resultado, 0, primero.Length);
@@ -228,7 +241,7 @@ namespace proyecto_integrador.Service
             return resultado;
         }
 
-        private static void EscribirAscii(Stream destino, string texto)
+        private void EscribirAscii(Stream destino, string texto)
         {
             byte[] bytes = Encoding.ASCII.GetBytes(texto);
             destino.Write(bytes, 0, bytes.Length);

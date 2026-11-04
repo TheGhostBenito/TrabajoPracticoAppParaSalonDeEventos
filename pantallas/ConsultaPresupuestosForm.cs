@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -6,17 +6,19 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using proyecto_integrador.controller;
-using proyecto_integrador.models;
+using proyecto_integrador.dto;
 
 namespace proyecto_integrador.pantallas
 {
     public partial class ConsultaPresupuestosForm : Form
     {
+        // La vista solo muestra lo que le devuelve el Controller (PresupuestoDto con los importes ya calculados).
         private readonly PresupuestoController _controller;
 
-        public event Action<Presupuesto> SolicitarEdicion;
+        public event Action<PresupuestoDto> SolicitarEdicion;
         public event Action SolicitarInicio;
 
+        // Constructor sin parámetros: lo necesita el diseñador de Visual Studio.
         public ConsultaPresupuestosForm()
         {
             _controller = null;
@@ -33,7 +35,7 @@ namespace proyecto_integrador.pantallas
             _controller = controller;
             InitializeComponent();
             _grilla.SelectionChanged += grilla_SelectionChanged;
-            _grilla.CellDoubleClick += delegate { EditarSeleccionado(); };
+            _grilla.CellDoubleClick += grilla_CellDoubleClick;
             _botonModificar.Click += botonModificar_Click;
             _botonImprimirPresupuesto.Click += botonImprimirPresupuesto_Click;
             _botonVolverInicio.Click += botonVolverInicio_Click;
@@ -51,15 +53,21 @@ namespace proyecto_integrador.pantallas
             _grilla.DataSource = _controller.ObtenerPresupuestos();
             _grilla.ClearSelection();
             _grilla.CurrentCell = null;
-            _detalle.Text = _grilla.Rows.Count == 0
-                ? "Todavía no hay presupuestos creados en esta sesión."
-                : "Seleccioná un presupuesto para consultar su detalle.";
+
+            if (_grilla.Rows.Count == 0)
+            {
+                _detalle.Text = "Todavía no hay presupuestos creados en esta sesión.";
+            }
+            else
+            {
+                _detalle.Text = "Seleccioná un presupuesto para consultar su detalle.";
+            }
 
             if (presupuestoSeleccionadoId > 0)
             {
                 foreach (DataGridViewRow fila in _grilla.Rows)
                 {
-                    Presupuesto presupuesto = fila.DataBoundItem as Presupuesto;
+                    PresupuestoDto presupuesto = fila.DataBoundItem as PresupuestoDto;
                     if (presupuesto != null && presupuesto.Id == presupuestoSeleccionadoId)
                     {
                         fila.Selected = true;
@@ -75,7 +83,7 @@ namespace proyecto_integrador.pantallas
 
         private void grilla_SelectionChanged(object sender, EventArgs e)
         {
-            Presupuesto presupuesto = ObtenerSeleccionado();
+            PresupuestoDto presupuesto = ObtenerSeleccionado();
             if (presupuesto == null)
             {
                 ActualizarEstadoBotones();
@@ -84,6 +92,11 @@ namespace proyecto_integrador.pantallas
 
             _detalle.Text = CrearDetalle(presupuesto);
             ActualizarEstadoBotones();
+        }
+
+        private void grilla_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            EditarSeleccionado();
         }
 
         private void botonModificar_Click(object sender, EventArgs e)
@@ -101,7 +114,7 @@ namespace proyecto_integrador.pantallas
 
         private void EditarSeleccionado()
         {
-            Presupuesto presupuesto = ObtenerSeleccionado();
+            PresupuestoDto presupuesto = ObtenerSeleccionado();
             if (presupuesto == null)
             {
                 MessageBox.Show("Seleccioná un presupuesto para modificarlo.", "Atención",
@@ -117,7 +130,7 @@ namespace proyecto_integrador.pantallas
 
         private void botonImprimirPresupuesto_Click(object sender, EventArgs e)
         {
-            Presupuesto presupuesto = ObtenerSeleccionado();
+            PresupuestoDto presupuesto = ObtenerSeleccionado();
             if (presupuesto == null)
             {
                 MessageBox.Show("Seleccioná un presupuesto para exportarlo a PDF.", "Atención",
@@ -155,7 +168,9 @@ namespace proyecto_integrador.pantallas
 
                     try
                     {
-                        Process.Start(new ProcessStartInfo(rutaPdf) { UseShellExecute = true });
+                        ProcessStartInfo informacion = new ProcessStartInfo(rutaPdf);
+                        informacion.UseShellExecute = true;
+                        Process.Start(informacion);
                     }
                     catch (InvalidOperationException ex)
                     {
@@ -184,30 +199,31 @@ namespace proyecto_integrador.pantallas
             }
         }
 
-        private static void MostrarErrorAlAbrirPdf(string mensaje)
+        private void MostrarErrorAlAbrirPdf(string mensaje)
         {
             MessageBox.Show("El PDF se generó, pero no se pudo abrir automáticamente: " + mensaje,
                 "PDF generado", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private Presupuesto ObtenerSeleccionado()
+        private PresupuestoDto ObtenerSeleccionado()
         {
             if (_grilla.CurrentRow == null)
             {
                 return null;
             }
 
-            return _grilla.CurrentRow.DataBoundItem as Presupuesto;
+            return _grilla.CurrentRow.DataBoundItem as PresupuestoDto;
         }
 
         private void ActualizarEstadoBotones()
         {
-            Presupuesto seleccionado = ObtenerSeleccionado();
+            PresupuestoDto seleccionado = ObtenerSeleccionado();
             _botonModificar.Enabled = seleccionado != null;
             _botonImprimirPresupuesto.Enabled = seleccionado != null;
         }
 
-        private static string CrearDetalle(Presupuesto presupuesto)
+        // Solo da formato de texto a datos que ya vienen calculados en el DTO. No calcula nada.
+        private string CrearDetalle(PresupuestoDto presupuesto)
         {
             StringBuilder detalle = new StringBuilder();
             detalle.AppendLine("PRESUPUESTO #" + presupuesto.Id);
@@ -216,16 +232,16 @@ namespace proyecto_integrador.pantallas
             detalle.AppendLine("Cliente: " + presupuesto.NombreContacto);
             detalle.AppendLine("Contacto: " + presupuesto.EmailContacto + "  |  Teléfono: " + presupuesto.TelefonoContacto);
             detalle.AppendLine("Salón: " + presupuesto.NombreSalon + " — " + presupuesto.UbicacionEvento);
-            detalle.AppendLine("Duración: " + presupuesto.Evento.Duracion + " horas");
-            detalle.AppendLine("Invitados: " + presupuesto.Evento.CantidadAdultos + " adultos y " + presupuesto.Evento.CantidadNinos + " niños");
+            detalle.AppendLine("Duración: " + presupuesto.DuracionHoras + " horas");
+            detalle.AppendLine("Invitados: " + presupuesto.CantidadAdultos + " adultos y " + presupuesto.CantidadNinos + " niños");
             detalle.AppendLine();
             detalle.AppendLine("Menús:");
 
-            foreach (DetalleDeMenus menu in presupuesto.Menues)
+            foreach (DetalleMenuPresupuestoDto menu in presupuesto.Menues)
             {
-                detalle.AppendLine("• " + menu.MenuElegido.Nombre + " — " + menu.ExclusionDelMenu
+                detalle.AppendLine("• " + menu.NombreMenu + " — " + menu.Particularidad
                     + ": " + menu.CantidadAdultos + " adultos, " + menu.CantidadNinos + " niños; "
-                    + menu.CalcularSubtotal().ToString("C2", CultureInfo.CurrentCulture));
+                    + menu.Subtotal.ToString("C2", CultureInfo.CurrentCulture));
             }
 
             detalle.AppendLine("Servicios adicionales:");
@@ -235,7 +251,7 @@ namespace proyecto_integrador.pantallas
             }
             else
             {
-                foreach (ServiciosAdicionales servicio in presupuesto.ServiciosAdicionales)
+                foreach (ServicioAdicionalDto servicio in presupuesto.ServiciosAdicionales)
                 {
                     detalle.AppendLine("• " + servicio.Descripcion + " — "
                         + servicio.CostoDelServicio.ToString("C2", CultureInfo.CurrentCulture));
@@ -262,6 +278,5 @@ namespace proyecto_integrador.pantallas
 
             return detalle.ToString();
         }
-
     }
 }

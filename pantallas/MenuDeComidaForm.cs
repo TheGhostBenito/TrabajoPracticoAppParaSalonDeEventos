@@ -1,40 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using proyecto_integrador.models;
-using proyecto_integrador.repository;
-using proyecto_integrador.Service;
+using proyecto_integrador.controller;
+using proyecto_integrador.dto;
 
 namespace proyecto_integrador.pantallas
 {
     public partial class MenuDeComidaForm : Form
     {
-        private readonly MenuService _service;
+        // La vista solo conoce al Controller y a los DTO.
+        private readonly MenuController _controller;
 
+        // Constructor sin parámetros: lo necesita el diseñador de Visual Studio.
         public MenuDeComidaForm()
         {
             InitializeComponent();
-            _service = new MenuService(MenuRepository.Instance);
+        }
 
+        public MenuDeComidaForm(MenuController controller)
+            : this()
+        {
+            if (controller == null)
+            {
+                throw new ArgumentNullException("controller");
+            }
+
+            _controller = controller;
             dgvMenusCreados.AutoGenerateColumns = false; // Usamos las columnas definidas en el diseñador
             CargarGrilla();
 
             // Al abrir la pantalla, que no quede ninguna fila seleccionada
-            this.Shown += delegate { dgvMenusCreados.ClearSelection(); };
+            this.Shown += MenuDeComidaForm_Shown;
+        }
+
+        private void MenuDeComidaForm_Shown(object sender, EventArgs e)
+        {
+            dgvMenusCreados.ClearSelection();
         }
 
         // ---------- READ ----------
         private void CargarGrilla()
         {
             dgvMenusCreados.DataSource = null;
-            dgvMenusCreados.DataSource = _service.ObtenerTodos();
+            dgvMenusCreados.DataSource = _controller.ObtenerTodos();
             dgvMenusCreados.ClearSelection();
         }
 
@@ -46,7 +54,7 @@ namespace proyecto_integrador.pantallas
                 return;
             }
 
-            MenuDeComida seleccionado = dgvMenusCreados.Rows[e.RowIndex].DataBoundItem as MenuDeComida;
+            MenuDto seleccionado = dgvMenusCreados.Rows[e.RowIndex].DataBoundItem as MenuDto;
             if (seleccionado == null)
             {
                 return;
@@ -68,7 +76,7 @@ namespace proyecto_integrador.pantallas
 
             try
             {
-                _service.Crear(txtBoxNombre.Text, costoAdulto, costoNino);
+                _controller.Crear(CrearDto(0, costoAdulto, costoNino));
                 CargarGrilla();
                 LimpiarCampos();
             }
@@ -81,7 +89,7 @@ namespace proyecto_integrador.pantallas
         // ---------- UPDATE ----------
         private void btnModificarMenu_Click(object sender, EventArgs e)
         {
-            MenuDeComida seleccionado = ObtenerMenuSeleccionado();
+            MenuDto seleccionado = ObtenerMenuSeleccionado();
             if (seleccionado == null)
             {
                 MessageBox.Show("Seleccioná un menú de la lista para modificarlo.", "Atención",
@@ -97,7 +105,14 @@ namespace proyecto_integrador.pantallas
 
             try
             {
-                _service.Modificar(seleccionado.Id, txtBoxNombre.Text, costoAdulto, costoNino);
+                bool modificado = _controller.Modificar(CrearDto(seleccionado.Id, costoAdulto, costoNino));
+                if (!modificado)
+                {
+                    MessageBox.Show("No se encontró el menú seleccionado.", "Atención",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
                 CargarGrilla();
                 LimpiarCampos();
             }
@@ -110,7 +125,7 @@ namespace proyecto_integrador.pantallas
         // ---------- DELETE ----------
         private void btnEliminarMenu_Click(object sender, EventArgs e)
         {
-            MenuDeComida seleccionado = ObtenerMenuSeleccionado();
+            MenuDto seleccionado = ObtenerMenuSeleccionado();
             if (seleccionado == null)
             {
                 MessageBox.Show("Seleccioná un menú de la lista para eliminarlo.", "Atención",
@@ -124,7 +139,7 @@ namespace proyecto_integrador.pantallas
 
             if (respuesta == DialogResult.Yes)
             {
-                _service.Eliminar(seleccionado.Id);
+                _controller.Eliminar(seleccionado.Id);
                 CargarGrilla();
                 LimpiarCampos();
             }
@@ -136,13 +151,25 @@ namespace proyecto_integrador.pantallas
         }
 
         // ---------- Auxiliares ----------
-        private MenuDeComida ObtenerMenuSeleccionado()
+        private MenuDto ObtenerMenuSeleccionado()
         {
             if (dgvMenusCreados.SelectedRows.Count == 0)
             {
                 return null;
             }
-            return dgvMenusCreados.SelectedRows[0].DataBoundItem as MenuDeComida;
+
+            return dgvMenusCreados.SelectedRows[0].DataBoundItem as MenuDto;
+        }
+
+        // Arma el DTO con lo escrito en pantalla. Las reglas las valida el Service.
+        private MenuDto CrearDto(int id, decimal costoAdulto, decimal costoNino)
+        {
+            MenuDto dto = new MenuDto();
+            dto.Id = id;
+            dto.Nombre = txtBoxNombre.Text;
+            dto.CostoPorAdulto = costoAdulto;
+            dto.CostoPorNiño = costoNino;
+            return dto;
         }
 
         // Convierte el texto a números. Eso es de la pantalla; las reglas (>= 0, nombre vacío) las valida el service

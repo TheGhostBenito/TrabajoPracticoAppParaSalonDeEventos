@@ -1,20 +1,31 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows.Forms;
-using proyecto_integrador.Service;
-using proyecto_integrador.models;
-using proyecto_integrador.repository;
+using proyecto_integrador.controller;
+using proyecto_integrador.dto;
 
 namespace proyecto_integrador.pantallas
 {
     public partial class ServiciosAdicionalesForm : Form
     {
-        private readonly ServiciosAdicionalesService servicio;
+        // La vista solo conoce al Controller y a los DTO.
+        private readonly ServiciosAdicionalesController _controller;
 
+        // Constructor sin parámetros: lo necesita el diseñador de Visual Studio.
         public ServiciosAdicionalesForm()
         {
             InitializeComponent();
-            servicio = new ServiciosAdicionalesService(ServiciosAdicionalesRepository.Instance);
+        }
+
+        public ServiciosAdicionalesForm(ServiciosAdicionalesController controller)
+            : this()
+        {
+            if (controller == null)
+            {
+                throw new ArgumentNullException("controller");
+            }
+
+            _controller = controller;
             dgvServiciosCreados.AutoGenerateColumns = false;
             CargarServicios();
         }
@@ -22,7 +33,7 @@ namespace proyecto_integrador.pantallas
         private void CargarServicios()
         {
             dgvServiciosCreados.DataSource = null;
-            dgvServiciosCreados.DataSource = servicio.ObtenerTodos();
+            dgvServiciosCreados.DataSource = _controller.ObtenerTodos();
             dgvServiciosCreados.ClearSelection();
         }
 
@@ -33,7 +44,7 @@ namespace proyecto_integrador.pantallas
                 return;
             }
 
-            ServiciosAdicionales seleccionado = dgvServiciosCreados.Rows[e.RowIndex].DataBoundItem as ServiciosAdicionales;
+            ServicioAdicionalDto seleccionado = dgvServiciosCreados.Rows[e.RowIndex].DataBoundItem as ServicioAdicionalDto;
             if (seleccionado == null)
             {
                 return;
@@ -53,7 +64,7 @@ namespace proyecto_integrador.pantallas
 
             try
             {
-                servicio.Crear(txtBoxDescripcion.Text, monto);
+                _controller.Crear(CrearDto(0, monto));
                 CargarServicios();
                 LimpiarCampos();
             }
@@ -65,7 +76,7 @@ namespace proyecto_integrador.pantallas
 
         private void btnEliminarServicio_Click(object sender, EventArgs e)
         {
-            ServiciosAdicionales seleccionado = ObtenerServicioSeleccionado();
+            ServicioAdicionalDto seleccionado = ObtenerServicioSeleccionado();
             if (seleccionado == null)
             {
                 MessageBox.Show("Seleccioná un servicio de la lista para eliminarlo.", "Atención",
@@ -79,7 +90,7 @@ namespace proyecto_integrador.pantallas
 
             if (respuesta == DialogResult.Yes)
             {
-                servicio.Eliminar(seleccionado.Id);
+                _controller.Eliminar(seleccionado.Id);
                 CargarServicios();
                 LimpiarCampos();
             }
@@ -87,7 +98,7 @@ namespace proyecto_integrador.pantallas
 
         private void btnModificarServicio_Click(object sender, EventArgs e)
         {
-            ServiciosAdicionales seleccionado = ObtenerServicioSeleccionado();
+            ServicioAdicionalDto seleccionado = ObtenerServicioSeleccionado();
             if (seleccionado == null)
             {
                 MessageBox.Show("Seleccioná un servicio de la lista para modificarlo.", "Atención",
@@ -103,7 +114,7 @@ namespace proyecto_integrador.pantallas
 
             try
             {
-                bool modificado = servicio.Modificar(seleccionado.Id, txtBoxDescripcion.Text, monto);
+                bool modificado = _controller.Modificar(CrearDto(seleccionado.Id, monto));
                 if (!modificado)
                 {
                     MessageBox.Show("No se encontró el servicio seleccionado.", "Atención",
@@ -120,14 +131,24 @@ namespace proyecto_integrador.pantallas
             }
         }
 
-        private ServiciosAdicionales ObtenerServicioSeleccionado()
+        private ServicioAdicionalDto ObtenerServicioSeleccionado()
         {
             if (dgvServiciosCreados.CurrentRow == null)
             {
                 return null;
             }
 
-            return dgvServiciosCreados.CurrentRow.DataBoundItem as ServiciosAdicionales;
+            return dgvServiciosCreados.CurrentRow.DataBoundItem as ServicioAdicionalDto;
+        }
+
+        // Arma el DTO con lo escrito en pantalla. Las reglas las valida el Service.
+        private ServicioAdicionalDto CrearDto(int id, decimal monto)
+        {
+            ServicioAdicionalDto dto = new ServicioAdicionalDto();
+            dto.Id = id;
+            dto.Descripcion = txtBoxDescripcion.Text;
+            dto.CostoDelServicio = monto;
+            return dto;
         }
 
         private bool TryObtenerMonto(out decimal monto)

@@ -1,40 +1,41 @@
+﻿using System;
 using System.Collections.Generic;
 using proyecto_integrador.dto;
-using proyecto_integrador.models;
-using proyecto_integrador.repository;
 using proyecto_integrador.Service;
-using proyecto_integrador.service;
 
 namespace proyecto_integrador.controller
 {
+    // El Controller solo recibe lo que manda la vista y se lo pasa al Service. No calcula ni valida nada.
     public sealed class PresupuestoController
     {
-        private readonly PresupuestoService _service;
+        private readonly IPresupuestoService _service;
 
-        public PresupuestoController()
+        public PresupuestoController(IPresupuestoService service)
         {
-            _service = new PresupuestoService(
-                PresupuestoRepository.Instance,
-                MenuRepository.Instance,
-                ServiciosAdicionalesRepository.Instance);
+            if (service == null)
+            {
+                throw new ArgumentNullException("service");
+            }
+
+            _service = service;
         }
 
-        public List<Salon> ObtenerSalones()
+        public List<SalonDto> ObtenerSalones(int presupuestoId)
         {
-            return SalonService.ObtenerSalones();
+            return _service.ObtenerSalonesDisponibles(presupuestoId);
         }
 
-        public List<MenuDeComida> ObtenerMenus()
+        public List<MenuDto> ObtenerMenus(int presupuestoId)
         {
-            return MenuRepository.Instance.ObtenerTodos();
+            return _service.ObtenerMenusDisponibles(presupuestoId);
         }
 
-        public List<ServiciosAdicionales> ObtenerServiciosAdicionales()
+        public List<ServicioAdicionalDto> ObtenerServiciosAdicionales(int presupuestoId)
         {
-            return ServiciosAdicionalesRepository.Instance.ObtenerTodos();
+            return _service.ObtenerServiciosDisponibles(presupuestoId);
         }
 
-        public List<Presupuesto> ObtenerPresupuestos()
+        public List<PresupuestoDto> ObtenerPresupuestos()
         {
             return _service.ObtenerTodos();
         }
@@ -52,12 +53,17 @@ namespace proyecto_integrador.controller
             return _service.CalcularEstimacion(solicitud, presupuestoExistenteId);
         }
 
-        public Presupuesto Crear(PresupuestoRequestDto solicitud)
+        public void ValidarServicioPersonalizado(string descripcion, decimal monto)
+        {
+            _service.ValidarServicioPersonalizado(descripcion, monto);
+        }
+
+        public PresupuestoDto Crear(PresupuestoRequestDto solicitud)
         {
             return _service.Crear(solicitud);
         }
 
-        public Presupuesto Modificar(int id, PresupuestoRequestDto solicitud)
+        public PresupuestoDto Modificar(int id, PresupuestoRequestDto solicitud)
         {
             return _service.Modificar(id, solicitud);
         }
