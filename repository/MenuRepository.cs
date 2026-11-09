@@ -5,7 +5,7 @@ using proyecto_integrador.repository;
 using System;
 using System.Collections.Generic;
 
-public sealed class MenuRepository : IMenuRepository
+public sealed class MenuRepository : IRepository<MenuDeComida>
 {
     // unica instancia del repositorio
     private static readonly MenuRepository instancia = new MenuRepository();
@@ -81,3 +81,29 @@ public sealed class MenuRepository : IMenuRepository
         {
             return false;
         }
+
+        // Actualiza los datos
+        existente.Nombre = menu.Nombre;
+        existente.CostoPorAdulto = menu.CostoPorAdulto;
+        existente.CostoPorNiño = menu.CostoPorNiño;
+
+        return true;
+    }
+
+    // Elimina un menú según su id
+    public bool Eliminar(int id)
+    {
+        // Busca el menú en la lista
+        MenuDeComida existente = ObtenerPorId(id);
+
+        if (existente == null)
+        {
+            return false;
+        }
+
+        // Lo elimina de la colección
+        _menus.Remove(existente);
+
+        return true;
+    }
+}

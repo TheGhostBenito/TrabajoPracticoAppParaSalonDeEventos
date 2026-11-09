@@ -105,14 +105,7 @@ namespace proyecto_integrador.pantallas
 
             try
             {
-                bool modificado = _controller.Modificar(CrearDto(seleccionado.Id, costoAdulto, costoNino));
-                if (!modificado)
-                {
-                    MessageBox.Show("No se encontró el menú seleccionado.", "Atención",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
+                _controller.Modificar(CrearDto(seleccionado.Id, costoAdulto, costoNino));
                 CargarGrilla();
                 LimpiarCampos();
             }

@@ -102,14 +102,7 @@ namespace proyecto_integrador.pantallas
 
             try
             {
-                bool modificado = _controller.Modificar(CrearDto(seleccionado.Id, monto));
-                if (!modificado)
-                {
-                    MessageBox.Show("No se encontró el salón seleccionado.", "Atención",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
+                _controller.Modificar(CrearDto(seleccionado.Id, monto));
                 CargarGrilla();
                 LimpiarCampos();
             }

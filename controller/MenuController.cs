@@ -8,10 +8,10 @@ using System.Collections.Generic;
 public sealed class MenuController
 {
     // Service utilizado para gestionar los menús
-    private readonly IMenuService _service;
+    private readonly IService<MenuDto, MenuDto> _service;
 
     // Recibe el Service mediante inyeccion de dependencias
-    public MenuController(IMenuService service)
+    public MenuController(IService<MenuDto, MenuDto> service)
     {
         // Verifica que el Service exista
         if (service == null)
@@ -35,9 +35,9 @@ public sealed class MenuController
     }
 
     // Solicita al Service modificar un menú existente
-    public bool Modificar(MenuDto menu)
+    public void Modificar(MenuDto menu)
     {
-        return _service.Modificar(menu);
+        _service.Modificar(menu.Id, menu);
     }
 
     // Solicita al Service eliminar un menú

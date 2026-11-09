@@ -1,20 +1,41 @@
-﻿using System.Collections.Generic;
+﻿// Contrato que define las operaciones disponibles
+// para la gestión de presupuestos.
 using proyecto_integrador.dto;
+using System.Collections.Generic;
 
-namespace proyecto_integrador.Service
+public interface IPresupuestoService
 {
-    // Contrato del service de presupuestos: lo que el Controller puede pedirle.
-    public interface IPresupuestoService
-    {
-        List<PresupuestoDto> ObtenerTodos();
-        List<SalonDto> ObtenerSalonesDisponibles(int presupuestoId);
-        List<MenuDto> ObtenerMenusDisponibles(int presupuestoId);
-        List<ServicioAdicionalDto> ObtenerServiciosDisponibles(int presupuestoId);
-        AsignacionMenuDto CalcularInvitadosRestantes(int cantidadAdultos, int cantidadNinos, List<DetalleMenuDto> menusPersonalizados);
-        decimal CalcularEstimacion(PresupuestoRequestDto solicitud, int presupuestoExistenteId);
-        void ValidarServicioPersonalizado(string descripcion, decimal monto);
-        PresupuestoDto Crear(PresupuestoRequestDto solicitud);
-        PresupuestoDto Modificar(int id, PresupuestoRequestDto solicitud);
-        string ExportarPdf(int presupuestoId, string ruta);
-    }
+    List<PresupuestoDto> ObtenerTodos();
+
+    List<SalonDto> ObtenerSalonesDisponibles(int presupuestoId);
+
+    List<MenuDto> ObtenerMenusDisponibles(int presupuestoId);
+
+    List<ServicioAdicionalDto> ObtenerServiciosDisponibles(int presupuestoId);
+
+    AsignacionMenuDto CalcularInvitadosRestantes(
+        int cantidadAdultos,
+        int cantidadNinos,
+        List<DetalleMenuDto> menusPersonalizados);
+
+    // Calcula una estimación del costo total del presupuesto
+    decimal CalcularEstimacion(
+        PresupuestoRequestDto solicitud,
+        int presupuestoExistenteId);
+
+    // Valida un servicio personalizado ingresado por el usuario
+    void ValidarServicioPersonalizado(
+        string descripcion,
+        decimal monto);
+
+    PresupuestoDto Crear(PresupuestoRequestDto solicitud);
+
+    PresupuestoDto Modificar(
+        int id,
+        PresupuestoRequestDto solicitud);
+
+    // Genera y exporta el presupuesto a PDF
+    string ExportarPdf(
+        int presupuestoId,
+        string ruta);
 }

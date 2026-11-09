@@ -10,8 +10,8 @@ namespace proyecto_integrador.Service
     // Este service genera el archivo pdf de un presupuesto
     // no usa ninguna librería externa: arma el PDF , escrbiendo el texto
     // línea por línea con el formato que exige un archivo pdf
-    // implementa IPresupuestoPdfService, así el PresupuestoService depende de la interfaz y no de esta clase
-    public class PresupuestoPdfService : IPresupuestoPdfService
+    // Es una clase normal (no estática): el PresupuestoService la recibe por constructor
+    public class PresupuestoPdfService
     {
         // Cantidad máxima de renglones de texto que entran en una hoja
         // ai se pasa  de 48, el texto sigue en una hoja nueva.

@@ -1,87 +1,124 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Service encargado de aplicar las reglas de negocio relacionadas con los salones.
 using proyecto_integrador.dto;
 using proyecto_integrador.models;
 using proyecto_integrador.repository;
+using proyecto_integrador.Service;
+using System;
+using System.Collections.Generic;
 
-namespace proyecto_integrador.Service
+public class SalonService : IService<SalonDto, SalonDto>
 {
-    public class SalonService : ISalonService
+    // repositorio utilizado para acceder a los datos de los salones
+    private readonly IRepository<Salon> _repo;
+
+    // recibe el repositorio mediante inyección de dependencias
+    public SalonService(IRepository<Salon> repo)
     {
-        private readonly ISalonRepository _repo;
-
-        public SalonService(ISalonRepository repo)
+        //     Verifica que el repositorio exista
+        if (repo == null)
         {
-            if (repo == null)
-            {
-                throw new ArgumentNullException("repo");
-            }
-
-            _repo = repo;
+            throw new ArgumentNullException("repo");
         }
 
-        public List<SalonDto> ObtenerTodos()
-        {
-            List<SalonDto> resultado = new List<SalonDto>();
-            foreach (Salon salon in _repo.ObtenerTodos())
-            {
-                resultado.Add(ConvertirADto(salon));
-            }
+        _repo = repo;
+    }
 
-            return resultado;
+    // Obtiene todos los salones y los convierte a dto
+    public List<SalonDto> ObtenerTodos()
+    {
+        List<SalonDto> resultado = new List<SalonDto>();
+
+        foreach (Salon salon in _repo.ObtenerTodos())
+        {
+            resultado.Add(ConvertirADto(salon));
         }
 
-        public void Crear(SalonDto salon)
+        return resultado;
+    }
+
+    // Valida los datos y crea un nuevo salón
+    public SalonDto Crear(SalonDto salon)
+    {
+        Validar(salon);
+
+        // Convierte el dto en una entidad del modelo
+        Salon nuevo = new Salon(
+            0,
+            salon.Nombre.Trim(),
+            salon.Ubicacion.Trim(),
+            salon.CostoBase);
+
+        _repo.Crear(nuevo);
+
+        // Devuelve el elemento creado, ya convertido a DTO
+        return ConvertirADto(nuevo);
+    }
+
+    // valida los datos y modifica un salón existente
+    public SalonDto Modificar(int id, SalonDto salon)
+    {
+        Validar(salon);
+
+        Salon modificado = new Salon(
+            id,
+            salon.Nombre.Trim(),
+            salon.Ubicacion.Trim(),
+            salon.CostoBase);
+
+        // Si no se encuentra, se avisa con un error (la pantalla muestra el mensaje)
+        if (!_repo.Modificar(modificado))
         {
-            Validar(salon);
-            Salon nuevo = new Salon(0, salon.Nombre.Trim(), salon.Ubicacion.Trim(), salon.CostoBase);
-            _repo.Crear(nuevo);
+            throw new ArgumentException("No se encontró el salón seleccionado.");
         }
 
-        public bool Modificar(SalonDto salon)
+        // Devuelve el elemento modificado, ya convertido a DTO
+        return ConvertirADto(modificado);
+    }
+
+    // solicita al repositorio eliminar un salón
+    public bool Eliminar(int id)
+    {
+        return _repo.Eliminar(id);
+    }
+
+    // Reglas de negocio para los salones
+    private void Validar(SalonDto salon)
+    {
+        // Verifica que el dto exista
+        if (salon == null)
         {
-            Validar(salon);
-            Salon modificado = new Salon(salon.Id, salon.Nombre.Trim(), salon.Ubicacion.Trim(), salon.CostoBase);
-            return _repo.Modificar(modificado);
+            throw new ArgumentNullException("salon");
         }
 
-        public bool Eliminar(int id)
+        // El nombre es obligatorio
+        if (string.IsNullOrWhiteSpace(salon.Nombre))
         {
-            return _repo.Eliminar(id);
+            throw new ArgumentException("Ingresá el nombre del salón.");
         }
 
-        // Reglas de negocio: si algo no se cumple, se lanza una excepción con el mensaje para el usuario
-        private void Validar(SalonDto salon)
+        // La ubicación es obligatoria
+        if (string.IsNullOrWhiteSpace(salon.Ubicacion))
         {
-            if (salon == null)
-            {
-                throw new ArgumentNullException("salon");
-            }
-
-            if (string.IsNullOrWhiteSpace(salon.Nombre))
-            {
-                throw new ArgumentException("Ingresá el nombre del salón.");
-            }
-
-            if (string.IsNullOrWhiteSpace(salon.Ubicacion))
-            {
-                throw new ArgumentException("Ingresá la ubicación del salón.");
-            }
-
-            if (salon.CostoBase < 0)
-            {
-                throw new ArgumentException("El monto tiene que ser mayor o igual a 0.");
-            }
+            throw new ArgumentException("Ingresá la ubicación del salón.");
         }
 
-        private SalonDto ConvertirADto(Salon salon)
+        // El costo no puede ser negativo
+        if (salon.CostoBase < 0)
         {
-            SalonDto dto = new SalonDto();
-            dto.Id = salon.Id;
-            dto.Nombre = salon.Nombre;
-            dto.Ubicacion = salon.Ubicacion;
-            dto.CostoBase = salon.CostoBase;
-            return dto;
+            throw new ArgumentException("El monto tiene que ser mayor o igual a 0.");
         }
+    }
+
+    // C¿onvierte una entidad Salon en un SalonDto
+    private SalonDto ConvertirADto(Salon salon)
+    {
+        SalonDto dto = new SalonDto();
+
+        dto.Id = salon.Id;
+        dto.Nombre = salon.Nombre;
+        dto.Ubicacion = salon.Ubicacion;
+        dto.CostoBase = salon.CostoBase;
+
+        return dto;
     }
 }

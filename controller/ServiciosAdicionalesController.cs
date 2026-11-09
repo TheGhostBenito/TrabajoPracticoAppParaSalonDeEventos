@@ -9,10 +9,10 @@ public sealed class ServiciosAdicionalesController
 {
     // service utilizado para gestionar los servicios adicionales
     // referencia al Service Se asigna una sola vez en el constructor
-    private readonly IServiciosAdicionalesService _service;
+    private readonly IService<ServicioAdicionalDto, ServicioAdicionalDto> _service;
 
     // Recibe el Service mediante inyección de dependencias
-    public ServiciosAdicionalesController(IServiciosAdicionalesService service)
+    public ServiciosAdicionalesController(IService<ServicioAdicionalDto, ServicioAdicionalDto> service)
     {
         // Verifica que el Service exista
         if (service == null)
@@ -36,9 +36,9 @@ public sealed class ServiciosAdicionalesController
     }
 
     // Solicita al Service modificar un servicio existente
-    public bool Modificar(ServicioAdicionalDto servicio)
+    public void Modificar(ServicioAdicionalDto servicio)
     {
-        return _service.Modificar(servicio);
+        _service.Modificar(servicio.Id, servicio);
     }
 
     // Solicita al Service eliminar un servicio

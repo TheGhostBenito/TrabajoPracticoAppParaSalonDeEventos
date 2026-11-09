@@ -99,15 +99,8 @@
     <Compile Include="dto\ServicioAdicionalDto.cs" />
     <Compile Include="dto\DetalleMenuPresupuestoDto.cs" />
     <Compile Include="dto\PresupuestoDto.cs" />
-    <Compile Include="repository\ISalonRepository.cs" />
-    <Compile Include="repository\IMenuRepository.cs" />
-    <Compile Include="repository\IServiciosAdicionalesRepository.cs" />
-    <Compile Include="repository\IPresupuestoRepository.cs" />
-    <Compile Include="Service\ISalonService.cs" />
-    <Compile Include="Service\IMenuService.cs" />
-    <Compile Include="Service\IServiciosAdicionalesService.cs" />
-    <Compile Include="Service\IPresupuestoService.cs" />
-    <Compile Include="Service\IPresupuestoPdfService.cs" />
+    <Compile Include="repository\IRepository.cs" />
+    <Compile Include="Service\IService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="repository\MenuRepository.cs" />

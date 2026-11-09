@@ -5,12 +5,15 @@ using proyecto_integrador.models;
 
 namespace proyecto_integrador.dto
 {
+    // dto utilizado para transportar los datos de un servicio personalizado.
     public sealed class ServicioPersonalizadoDto
     {
         public string Descripcion { get; set; }
         public decimal MontoFijo { get; set; }
     }
 
+    // dto que representa una fila de menu dentro de un presupuesto.
+    // Implementa INotifyPropertyChanged para notificar cambios a la interfaz.
     public sealed class DetalleMenuDto : INotifyPropertyChanged
     {
         private int _menuId;
@@ -18,6 +21,7 @@ namespace proyecto_integrador.dto
         private int _cantidadNinos;
         private TipoDeExclusionDeMenu _particularidad;
 
+        // Evento utilizado para informar cambios en las propiedades.
         public event PropertyChangedEventHandler PropertyChanged;
 
         public int MenuId
@@ -72,6 +76,7 @@ namespace proyecto_integrador.dto
             }
         }
 
+        // Notifica a la interfaz que una propiedad fue modificada
         private void NotificarCambio(string propiedad)
         {
             if (PropertyChanged != null)
@@ -81,6 +86,7 @@ namespace proyecto_integrador.dto
         }
     }
 
+    // DTO utilizado para transportar las cantidades de invitados asignados.
     public sealed class AsignacionMenuDto
     {
         public int CantidadAdultos { get; set; }
@@ -93,6 +99,8 @@ namespace proyecto_integrador.dto
         }
     }
 
+    // dto de entrada que contiene toda la información necesaria
+    // para crear o modificar un presupuesto.
     public sealed class PresupuestoRequestDto
     {
         public string NombreContacto { get; set; }
@@ -112,6 +120,7 @@ namespace proyecto_integrador.dto
         public List<int> ServiciosAdicionalesIds { get; set; }
         public List<ServicioPersonalizadoDto> ServiciosPersonalizados { get; set; }
 
+        // inicializa las colecciones para evitar referencias nulas
         public PresupuestoRequestDto()
         {
             Menues = new List<DetalleMenuDto>();
