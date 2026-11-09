@@ -5,7 +5,7 @@ using proyecto_integrador.models;
 namespace proyecto_integrador.repository
 {
     // Singleton, una única instancia que guarda la lista de servicios adicionales mientras la app está abiert
-    public sealed class ServiciosAdicionalesRepository : IServiciosAdicionalesRepository
+    public sealed class ServiciosAdicionalesRepository : IRepository<ServiciosAdicionales>
     {
         private static readonly ServiciosAdicionalesRepository instancia = new ServiciosAdicionalesRepository();
         private readonly List<ServiciosAdicionales> _servicios; //// Se crea una única instancia del repositorio para toda la aplicación

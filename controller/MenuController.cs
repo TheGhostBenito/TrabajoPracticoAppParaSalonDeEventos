@@ -5,7 +5,11 @@ using proyecto_integrador.Service;
 
 namespace proyecto_integrador.controller
 {
-    public sealed class MenuController
+    // Service utilizado para gestionar los menús
+    private readonly IService<MenuDto, MenuDto> _service;
+
+    // Recibe el Service mediante inyeccion de dependencias
+    public MenuController(IService<MenuDto, MenuDto> service)
     {
         private readonly IMenuService _service;
 
@@ -29,10 +33,11 @@ namespace proyecto_integrador.controller
             _service.Crear(menu);
         }
 
-        public bool Modificar(MenuDto menu)
-        {
-            return _service.Modificar(menu);
-        }
+    // Solicita al Service modificar un menú existente
+    public void Modificar(MenuDto menu)
+    {
+        _service.Modificar(menu.Id, menu);
+    }
 
         public bool Eliminar(int id)
         {

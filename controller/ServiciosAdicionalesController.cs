@@ -5,7 +5,12 @@ using proyecto_integrador.Service;
 
 namespace proyecto_integrador.controller
 {
-    public sealed class ServiciosAdicionalesController
+    // service utilizado para gestionar los servicios adicionales
+    // referencia al Service Se asigna una sola vez en el constructor
+    private readonly IService<ServicioAdicionalDto, ServicioAdicionalDto> _service;
+
+    // Recibe el Service mediante inyección de dependencias
+    public ServiciosAdicionalesController(IService<ServicioAdicionalDto, ServicioAdicionalDto> service)
     {
         private readonly IServiciosAdicionalesService _service;
 
@@ -29,10 +34,11 @@ namespace proyecto_integrador.controller
             _service.Crear(servicio);
         }
 
-        public bool Modificar(ServicioAdicionalDto servicio)
-        {
-            return _service.Modificar(servicio);
-        }
+    // Solicita al Service modificar un servicio existente
+    public void Modificar(ServicioAdicionalDto servicio)
+    {
+        _service.Modificar(servicio.Id, servicio);
+    }
 
         public bool Eliminar(int id)
         {

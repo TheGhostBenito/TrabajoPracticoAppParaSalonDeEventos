@@ -6,7 +6,7 @@ namespace proyecto_integrador.repository
 {
     // Repositorio de salones
     // Implementa Singleton para mantener una única lista en memoria.
-    public sealed class SalonRepository : ISalonRepository
+    public sealed class SalonRepository : IRepository<Salon>
     {
         // Única instancia del repositorio (Singleton)
         private static readonly SalonRepository instancia = new SalonRepository();

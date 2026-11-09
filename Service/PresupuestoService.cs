@@ -7,21 +7,22 @@ using proyecto_integrador.repository;
 
 namespace proyecto_integrador.Service
 {
-    public class PresupuestoService : IPresupuestoService
+    public class PresupuestoService : IService<PresupuestoDto, PresupuestoRequestDto>
     {
         // Depende de INTERFACES, no de las clases concretas: así se puede cambiar el repositorio sin tocar este service.
-        private readonly IPresupuestoRepository _presupuestoRepository;
-        private readonly ISalonRepository _salonRepository;
-        private readonly IMenuRepository _menuRepository;
-        private readonly IServiciosAdicionalesRepository _serviciosRepository;
-        private readonly IPresupuestoPdfService _pdfService;
+        private readonly IRepository<Presupuesto> _presupuestoRepository;
+
+        private readonly IRepository<Salon> _salonRepository;
+        private readonly IRepository<MenuDeComida> _menuRepository;
+        private readonly IRepository<ServiciosAdicionales> _serviciosRepository;
+        private readonly PresupuestoPdfService _pdfService;
 
         public PresupuestoService(
-            IPresupuestoRepository presupuestoRepository,
-            ISalonRepository salonRepository,
-            IMenuRepository menuRepository,
-            IServiciosAdicionalesRepository serviciosRepository,
-            IPresupuestoPdfService pdfService)
+            IRepository<Presupuesto> presupuestoRepository,
+            IRepository<Salon> salonRepository,
+            IRepository<MenuDeComida> menuRepository,
+            IRepository<ServiciosAdicionales> serviciosRepository,
+            PresupuestoPdfService pdfService)
         {
             if (presupuestoRepository == null)
             {
@@ -283,14 +284,14 @@ namespace proyecto_integrador.Service
             return subtotal;
         }
 
-        // ---------- Alta, modificación y PDF ----------
+        //  Alta, modificación y pdf
 
         public PresupuestoDto Crear(PresupuestoRequestDto solicitud)
         {
             DepurarMenus(solicitud);
             Validar(solicitud, null);
             Presupuesto presupuesto = ConstruirPresupuesto(solicitud, 0, DateTime.Now, null);
-            _presupuestoRepository.Agregar(presupuesto);
+            _presupuestoRepository.Crear(presupuesto);
             return ConvertirADto(presupuesto);
         }
 
@@ -306,12 +307,18 @@ namespace proyecto_integrador.Service
             Validar(solicitud, existente);
             Presupuesto modificado = ConstruirPresupuesto(solicitud, existente.Id, existente.FechaCreacion, existente);
 
-            if (!_presupuestoRepository.Actualizar(modificado))
+            if (!_presupuestoRepository.Modificar(modificado))
             {
                 throw new InvalidOperationException("No se pudo actualizar el presupuesto.");
             }
 
             return ConvertirADto(modificado);
+        }
+
+        // Elimina un presupuesto por su id (forma parte del contrato IService)
+        public bool Eliminar(int id)
+        {
+            return _presupuestoRepository.Eliminar(id);
         }
 
         public string ExportarPdf(int presupuestoId, string ruta)
@@ -339,7 +346,7 @@ namespace proyecto_integrador.Service
             }
         }
 
-        // ---------- Construcción del modelo ----------
+        //  Construcción del modelo
 
         private Presupuesto ConstruirPresupuesto(
             PresupuestoRequestDto solicitud,
@@ -407,7 +414,7 @@ namespace proyecto_integrador.Service
             return servicios;
         }
 
-        // ---------- Validaciones (reglas de negocio) ----------
+        //  Validaciones (reglas de negocio)
 
         private void Validar(PresupuestoRequestDto solicitud, Presupuesto existente)
         {
@@ -651,7 +658,7 @@ namespace proyecto_integrador.Service
             return unicos;
         }
 
-        // ---------- Copias y conversiones a DTO ----------
+        //  Copias y conversiones a DTO
 
         private Salon CopiarSalon(Salon salon)
         {

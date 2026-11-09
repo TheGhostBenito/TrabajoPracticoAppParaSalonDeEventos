@@ -5,7 +5,7 @@ using proyecto_integrador.repository;
 using System;
 using System.Collections.Generic;
 
-public sealed class PresupuestoRepository : IPresupuestoRepository
+public sealed class PresupuestoRepository : IRepository<Presupuesto>
 {
     // unica instancia del repositorio
     private static readonly PresupuestoRepository instancia = new PresupuestoRepository();
@@ -59,7 +59,7 @@ public sealed class PresupuestoRepository : IPresupuestoRepository
     }
 
     // Guarda un nuevo presupuesto
-    public Presupuesto Agregar(Presupuesto presupuesto)
+    public void Crear(Presupuesto presupuesto)
     {
         if (presupuesto == null)
         {
@@ -74,12 +74,10 @@ public sealed class PresupuestoRepository : IPresupuestoRepository
 
         // Agrega el presupuesto a la colecció{
         _presupuestos.Add(presupuesto);
-
-        return presupuesto;
     }
 
     // Actualiza un presupuesto existente
-    public bool Actualizar(Presupuesto presupuesto)
+    public bool Modificar(Presupuesto presupuesto)
     {
         // verifica que el objeto recibido no sea nulo
         if (presupuesto == null)
@@ -99,5 +97,22 @@ public sealed class PresupuestoRepository : IPresupuestoRepository
         }
 
         return false;
+    }
+
+    // Elimina un presupuesto según su id
+    public bool Eliminar(int id)
+    {
+        // Busca el presupuesto en la lista
+        Presupuesto existente = ObtenerPorId(id);
+
+        if (existente == null)
+        {
+            return false;
+        }
+
+        // Lo elimina de la colección
+        _presupuestos.Remove(existente);
+
+        return true;
     }
 }

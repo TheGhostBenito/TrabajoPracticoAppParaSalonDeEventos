@@ -7,7 +7,11 @@ using proyecto_integrador.models;
 
 namespace proyecto_integrador.Service
 {
-    public class PresupuestoPdfService : IPresupuestoPdfService
+    // Este service genera el archivo pdf de un presupuesto
+    // no usa ninguna librería externa: arma el PDF , escrbiendo el texto
+    // línea por línea con el formato que exige un archivo pdf
+    // Es una clase normal (no estática): el PresupuestoService la recibe por constructor
+    public class PresupuestoPdfService
     {
         private const int LineasPorPagina = 48;
 
