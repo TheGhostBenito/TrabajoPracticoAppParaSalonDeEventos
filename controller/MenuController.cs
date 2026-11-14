@@ -1,19 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using proyecto_integrador.dto;
 using proyecto_integrador.Service;
 
 namespace proyecto_integrador.controller
 {
-    // Service utilizado para gestionar los menús
-    private readonly IService<MenuDto, MenuDto> _service;
-
-    // Recibe el Service mediante inyeccion de dependencias
-    public MenuController(IService<MenuDto, MenuDto> service)
+    // El Controller solo recibe lo que manda la vista y se lo pasa al Service
+    public sealed class MenuController
     {
-        private readonly IMenuService _service;
+        // Service utilizado para gestionar los menús
+        private readonly IService<MenuDto, MenuDto> _service;
 
-        public MenuController(IMenuService service)
+        // Recibe el Service mediante inyeccion de dependencias
+        public MenuController(IService<MenuDto, MenuDto> service)
         {
             if (service == null)
             {
@@ -33,11 +32,11 @@ namespace proyecto_integrador.controller
             _service.Crear(menu);
         }
 
-    // Solicita al Service modificar un menú existente
-    public void Modificar(MenuDto menu)
-    {
-        _service.Modificar(menu.Id, menu);
-    }
+        // Solicita al Service modificar un menú existente
+        public void Modificar(MenuDto menu)
+        {
+            _service.Modificar(menu.Id, menu);
+        }
 
         public bool Eliminar(int id)
         {
