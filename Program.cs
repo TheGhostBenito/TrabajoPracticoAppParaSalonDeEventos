@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using proyecto_integrador.controller;
 using proyecto_integrador.dto;
@@ -22,9 +22,9 @@ namespace proyecto_integrador
             Application.SetCompatibleTextRenderingDefault(false);
 
             // Repositorios (cada uno es un Singleton). Todos se usan por la misma interfaz genérica IRepository<T>
-            IRepository<Salon> salonRepository = SalonRepository.Instance;
-            IRepository<MenuDeComida> menuRepository = MenuRepository.Instance;
-            IRepository<ServiciosAdicionales> serviciosRepository = ServiciosAdicionalesRepository.Instance;
+            IRepository<Salon> salonRepository = SalonMySqlRepository.Instance;
+            IRepository<MenuDeComida> menuRepository = MenuMySqlRepository.Instance;
+            IRepository<ServiciosAdicionales> serviciosRepository = ServiciosAdicionalesMySqlRepository.Instance;
             IRepository<Presupuesto> presupuestoRepository = PresupuestoRepository.Instance;
 
             // Services: reciben la interfaz genérica del repositorio

@@ -1,20 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using proyecto_integrador.dto;
 using proyecto_integrador.Service;
 
 namespace proyecto_integrador.controller
 {
-    // service utilizado para gestionar los servicios adicionales
-    // referencia al Service Se asigna una sola vez en el constructor
-    private readonly IService<ServicioAdicionalDto, ServicioAdicionalDto> _service;
-
-    // Recibe el Service mediante inyección de dependencias
-    public ServiciosAdicionalesController(IService<ServicioAdicionalDto, ServicioAdicionalDto> service)
+    // El Controller solo recibe lo que manda la vista y se lo pasa al Service
+    public sealed class ServiciosAdicionalesController
     {
-        private readonly IServiciosAdicionalesService _service;
+        // Service utilizado para gestionar los servicios adicionales.
+        // Se asigna una sola vez en el constructor
+        private readonly IService<ServicioAdicionalDto, ServicioAdicionalDto> _service;
 
-        public ServiciosAdicionalesController(IServiciosAdicionalesService service)
+        // Recibe el Service mediante inyección de dependencias
+        public ServiciosAdicionalesController(IService<ServicioAdicionalDto, ServicioAdicionalDto> service)
         {
             if (service == null)
             {
@@ -34,11 +33,11 @@ namespace proyecto_integrador.controller
             _service.Crear(servicio);
         }
 
-    // Solicita al Service modificar un servicio existente
-    public void Modificar(ServicioAdicionalDto servicio)
-    {
-        _service.Modificar(servicio.Id, servicio);
-    }
+        // Solicita al Service modificar un servicio existente
+        public void Modificar(ServicioAdicionalDto servicio)
+        {
+            _service.Modificar(servicio.Id, servicio);
+        }
 
         public bool Eliminar(int id)
         {
