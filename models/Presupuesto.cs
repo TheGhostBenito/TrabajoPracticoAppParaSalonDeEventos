@@ -5,6 +5,10 @@ namespace proyecto_integrador.models
 {
     public class Presupuesto
     {
+        // Un sola colección polimórfica: salón, menús, servicios y cualquier
+        // concepto nuevo conviven acá sin que el modelo tenga que cambiar.
+        private readonly List<ItemPresupuesto> _items;
+
         public int Id { get; internal set; }
         public DateTime FechaCreacion { get; private set; }
         public DateTime FechaEvento { get; private set; }
@@ -15,9 +19,6 @@ namespace proyecto_integrador.models
         public string UbicacionEvento { get; private set; }
         public string Observaciones { get; private set; }
         public Evento Evento { get; private set; }
-        public Salon SalonDelEvento { get; private set; }
-        public List<DetalleDeMenus> Menues { get; private set; }
-        public List<ServiciosAdicionales> ServiciosAdicionales { get; private set; }
         public decimal PorcentajeAdicionalMenuPrincipal { get; private set; }
         public decimal PorcentajeAdicionalMenuPersonalizado { get; private set; }
         public string RutaPdf { get; internal set; }
@@ -27,9 +28,69 @@ namespace proyecto_integrador.models
             get { return FechaEvento.Date.Add(HoraInicio).ToString("g"); }
         }
 
+        public List<ItemPresupuesto> Items
+        {
+            get { return new List<ItemPresupuesto>(_items); }
+        }
+
+        // Estas tres propiedades se mantienen para la vista y el PDF actuales,
+        // pero ya no son el almacenamiento del presupuesto: se derivan de Items.
+        public Salon SalonDelEvento
+        {
+            get
+            {
+                foreach (ItemPresupuesto item in _items)
+                {
+                    ItemSalon itemSalon = item as ItemSalon;
+                    if (itemSalon != null)
+                    {
+                        return itemSalon.Salon;
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        public List<DetalleDeMenus> Menues
+        {
+            get
+            {
+                List<DetalleDeMenus> resultado = new List<DetalleDeMenus>();
+                foreach (ItemPresupuesto item in _items)
+                {
+                    ItemMenu itemMenu = item as ItemMenu;
+                    if (itemMenu != null)
+                    {
+                        resultado.Add(itemMenu.Detalle);
+                    }
+                }
+
+                return resultado;
+            }
+        }
+
+        public List<ServiciosAdicionales> ServiciosAdicionales
+        {
+            get
+            {
+                List<ServiciosAdicionales> resultado = new List<ServiciosAdicionales>();
+                foreach (ItemPresupuesto item in _items)
+                {
+                    ItemServicio itemServicio = item as ItemServicio;
+                    if (itemServicio != null)
+                    {
+                        resultado.Add(itemServicio.Servicio);
+                    }
+                }
+
+                return resultado;
+            }
+        }
+
         public string NombreSalon
         {
-            get { return SalonDelEvento.Nombre; }
+            get { return SalonDelEvento == null ? string.Empty : SalonDelEvento.Nombre; }
         }
 
         public int CantidadTotalInvitados
@@ -39,7 +100,7 @@ namespace proyecto_integrador.models
 
         public decimal CostoSalon
         {
-            get { return SalonDelEvento.CostoBase * Evento.Duracion; }
+            get { return SumarItems<ItemSalon>(); }
         }
 
         public decimal SubtotalMenusPrincipales
@@ -47,11 +108,12 @@ namespace proyecto_integrador.models
             get
             {
                 decimal subtotal = 0m;
-                foreach (DetalleDeMenus detalle in Menues)
+                foreach (ItemPresupuesto item in _items)
                 {
-                    if (detalle.ExclusionDelMenu == TipoDeExclusionDeMenu.Ninguna)
+                    ItemMenu menu = item as ItemMenu;
+                    if (menu != null && menu.EsMenuPrincipal)
                     {
-                        subtotal += detalle.CalcularSubtotal();
+                        subtotal += menu.CalcularSubtotal();
                     }
                 }
 
@@ -64,11 +126,12 @@ namespace proyecto_integrador.models
             get
             {
                 decimal subtotal = 0m;
-                foreach (DetalleDeMenus detalle in Menues)
+                foreach (ItemPresupuesto item in _items)
                 {
-                    if (detalle.ExclusionDelMenu != TipoDeExclusionDeMenu.Ninguna)
+                    ItemMenu menu = item as ItemMenu;
+                    if (menu != null && !menu.EsMenuPrincipal)
                     {
-                        subtotal += detalle.CalcularSubtotal();
+                        subtotal += menu.CalcularSubtotal();
                     }
                 }
 
@@ -93,12 +156,21 @@ namespace proyecto_integrador.models
 
         public decimal CostoServiciosAdicionales
         {
+            get { return SumarItems<ItemServicio>(); }
+        }
+
+        // Cualquier ítem que no sea uno de los tres conocidos entra acá.
+        public decimal CostoOtrosItems
+        {
             get
             {
                 decimal subtotal = 0m;
-                foreach (ServiciosAdicionales servicio in ServiciosAdicionales)
+                foreach (ItemPresupuesto item in _items)
                 {
-                    subtotal += servicio.CostoDelServicio;
+                    if (!(item is ItemSalon) && !(item is ItemMenu) && !(item is ItemServicio))
+                    {
+                        subtotal += item.CalcularSubtotal();
+                    }
                 }
 
                 return subtotal;
@@ -107,7 +179,17 @@ namespace proyecto_integrador.models
 
         public decimal TotalFinal
         {
-            get { return decimal.Round(CostoSalon + CostoMenus + CostoServiciosAdicionales, 2); }
+            get
+            {
+                // Polimorfismo puro: se suman todos los ítems sin importar su tipo.
+                decimal subtotal = 0m;
+                foreach (ItemPresupuesto item in _items)
+                {
+                    subtotal += item.CalcularSubtotal();
+                }
+
+                return decimal.Round(subtotal + RecargoMenusPrincipales + RecargoMenusPersonalizados, 2);
+            }
         }
 
         public Presupuesto(
@@ -121,9 +203,7 @@ namespace proyecto_integrador.models
             string ubicacionEvento,
             string observaciones,
             Evento evento,
-            Salon salon,
-            List<DetalleDeMenus> menues,
-            List<ServiciosAdicionales> serviciosAdicionales,
+            IEnumerable<ItemPresupuesto> items,
             decimal porcentajeAdicionalMenuPrincipal,
             decimal porcentajeAdicionalMenuPersonalizado,
             string rutaPdf)
@@ -133,67 +213,55 @@ namespace proyecto_integrador.models
                 throw new ArgumentNullException("evento");
             }
 
-            if (salon == null)
+            if (items == null)
             {
-                throw new ArgumentNullException("salon");
-            }
-
-            if (menues == null)
-            {
-                throw new ArgumentNullException("menues");
-            }
-
-            if (serviciosAdicionales == null)
-            {
-                throw new ArgumentNullException("serviciosAdicionales");
-            }
-
-            if (nombreContacto == null)
-            {
-                nombreContacto = string.Empty;
-            }
-
-            if (emailContacto == null)
-            {
-                emailContacto = string.Empty;
-            }
-
-            if (telefonoContacto == null)
-            {
-                telefonoContacto = string.Empty;
-            }
-
-            if (ubicacionEvento == null)
-            {
-                ubicacionEvento = string.Empty;
-            }
-
-            if (observaciones == null)
-            {
-                observaciones = string.Empty;
-            }
-
-            if (rutaPdf == null)
-            {
-                rutaPdf = string.Empty;
+                throw new ArgumentNullException("items");
             }
 
             Id = id;
             FechaCreacion = fechaCreacion;
             FechaEvento = fechaEvento;
             HoraInicio = horaInicio;
-            NombreContacto = nombreContacto;
-            EmailContacto = emailContacto;
-            TelefonoContacto = telefonoContacto;
-            UbicacionEvento = ubicacionEvento;
-            Observaciones = observaciones;
+            NombreContacto = nombreContacto ?? string.Empty;
+            EmailContacto = emailContacto ?? string.Empty;
+            TelefonoContacto = telefonoContacto ?? string.Empty;
+            UbicacionEvento = ubicacionEvento ?? string.Empty;
+            Observaciones = observaciones ?? string.Empty;
             Evento = evento;
-            SalonDelEvento = salon;
-            Menues = new List<DetalleDeMenus>(menues);
-            ServiciosAdicionales = new List<ServiciosAdicionales>(serviciosAdicionales);
+            _items = new List<ItemPresupuesto>();
+            foreach (ItemPresupuesto item in items)
+            {
+                AgregarItem(item);
+            }
+
             PorcentajeAdicionalMenuPrincipal = porcentajeAdicionalMenuPrincipal;
             PorcentajeAdicionalMenuPersonalizado = porcentajeAdicionalMenuPersonalizado;
-            RutaPdf = rutaPdf;
+            RutaPdf = rutaPdf ?? string.Empty;
+        }
+
+        public void AgregarItem(ItemPresupuesto item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException("item");
+            }
+
+            _items.Add(item);
+        }
+
+        private decimal SumarItems<T>() where T : ItemPresupuesto
+        {
+            decimal subtotal = 0m;
+            foreach (ItemPresupuesto item in _items)
+            {
+                T itemTipado = item as T;
+                if (itemTipado != null)
+                {
+                    subtotal += itemTipado.CalcularSubtotal();
+                }
+            }
+
+            return subtotal;
         }
     }
 }

@@ -9,10 +9,10 @@ namespace proyecto_integrador.controller
     public sealed class MenuController
     {
         // Service utilizado para gestionar los menús
-        private readonly IService<MenuDto, MenuDto> _service;
+        private readonly IMenuService _service;
 
         // Recibe el Service mediante inyeccion de dependencias
-        public MenuController(IService<MenuDto, MenuDto> service)
+        public MenuController(IMenuService service)
         {
             if (service == null)
             {

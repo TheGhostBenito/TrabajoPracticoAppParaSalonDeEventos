@@ -16,6 +16,10 @@ namespace proyecto_integrador.pantallas
         private System.Windows.Forms.Button btnSalon;
         private System.Windows.Forms.Button btnMenu;
         private System.Windows.Forms.Button btnServiciosAdicionales;
+        private System.Windows.Forms.Panel panelModoDatos;
+        private System.Windows.Forms.Label lblTituloModoDatos;
+        private System.Windows.Forms.CheckBox chkModoDatos;
+        private System.Windows.Forms.Label lblDetalleModoDatos;
 
         protected override void Dispose(bool disposing)
         {
@@ -41,8 +45,13 @@ namespace proyecto_integrador.pantallas
             this.panelEncabezado = new System.Windows.Forms.Panel();
             this.lblDescripcionSeccion = new System.Windows.Forms.Label();
             this.lblTituloSeccion = new System.Windows.Forms.Label();
+            this.panelModoDatos = new System.Windows.Forms.Panel();
+            this.lblTituloModoDatos = new System.Windows.Forms.Label();
+            this.chkModoDatos = new System.Windows.Forms.CheckBox();
+            this.lblDetalleModoDatos = new System.Windows.Forms.Label();
             this.panelLateral.SuspendLayout();
             this.panelMarca.SuspendLayout();
+            this.panelModoDatos.SuspendLayout();
             this.panelPrincipal.SuspendLayout();
             this.panelEncabezado.SuspendLayout();
             this.SuspendLayout();
@@ -50,6 +59,7 @@ namespace proyecto_integrador.pantallas
             // panelLateral
             //
             this.panelLateral.BackColor = System.Drawing.Color.FromArgb(25, 35, 52);
+            this.panelLateral.Controls.Add(this.panelModoDatos);
             this.panelLateral.Controls.Add(this.btnServiciosAdicionales);
             this.panelLateral.Controls.Add(this.btnMenu);
             this.panelLateral.Controls.Add(this.btnSalon);
@@ -59,6 +69,63 @@ namespace proyecto_integrador.pantallas
             this.panelLateral.Name = "panelLateral";
             this.panelLateral.Size = new System.Drawing.Size(230, 760);
             this.panelLateral.TabIndex = 0;
+            //
+            // panelModoDatos
+            //
+            this.panelModoDatos.BackColor = System.Drawing.Color.FromArgb(25, 35, 52);
+            this.panelModoDatos.Controls.Add(this.lblDetalleModoDatos);
+            this.panelModoDatos.Controls.Add(this.chkModoDatos);
+            this.panelModoDatos.Controls.Add(this.lblTituloModoDatos);
+            this.panelModoDatos.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelModoDatos.Location = new System.Drawing.Point(0, 648);
+            this.panelModoDatos.Name = "panelModoDatos";
+            this.panelModoDatos.Padding = new System.Windows.Forms.Padding(14, 10, 14, 10);
+            this.panelModoDatos.Size = new System.Drawing.Size(230, 112);
+            this.panelModoDatos.TabIndex = 5;
+            //
+            // lblTituloModoDatos
+            //
+            this.lblTituloModoDatos.AutoSize = false;
+            this.lblTituloModoDatos.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblTituloModoDatos.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
+            this.lblTituloModoDatos.ForeColor = System.Drawing.Color.FromArgb(164, 177, 196);
+            this.lblTituloModoDatos.Location = new System.Drawing.Point(14, 10);
+            this.lblTituloModoDatos.Name = "lblTituloModoDatos";
+            this.lblTituloModoDatos.Size = new System.Drawing.Size(202, 18);
+            this.lblTituloModoDatos.TabIndex = 0;
+            this.lblTituloModoDatos.Text = "Datos del catálogo";
+            this.lblTituloModoDatos.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // chkModoDatos
+            //
+            this.chkModoDatos.Appearance = System.Windows.Forms.Appearance.Button;
+            this.chkModoDatos.AutoSize = false;
+            this.chkModoDatos.BackColor = System.Drawing.Color.FromArgb(90, 102, 120);
+            this.chkModoDatos.Dock = System.Windows.Forms.DockStyle.Top;
+            this.chkModoDatos.FlatAppearance.BorderSize = 0;
+            this.chkModoDatos.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chkModoDatos.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.chkModoDatos.ForeColor = System.Drawing.Color.White;
+            this.chkModoDatos.Location = new System.Drawing.Point(14, 28);
+            this.chkModoDatos.Name = "chkModoDatos";
+            this.chkModoDatos.Size = new System.Drawing.Size(202, 34);
+            this.chkModoDatos.TabIndex = 1;
+            this.chkModoDatos.Text = "Usando memoria (no guardar)";
+            this.chkModoDatos.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.chkModoDatos.UseVisualStyleBackColor = false;
+            this.chkModoDatos.CheckedChanged += new System.EventHandler(this.chkModoDatos_CheckedChanged);
+            //
+            // lblDetalleModoDatos
+            //
+            this.lblDetalleModoDatos.AutoSize = false;
+            this.lblDetalleModoDatos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblDetalleModoDatos.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.lblDetalleModoDatos.ForeColor = System.Drawing.Color.FromArgb(164, 177, 196);
+            this.lblDetalleModoDatos.Location = new System.Drawing.Point(14, 62);
+            this.lblDetalleModoDatos.Name = "lblDetalleModoDatos";
+            this.lblDetalleModoDatos.Size = new System.Drawing.Size(202, 40);
+            this.lblDetalleModoDatos.TabIndex = 2;
+            this.lblDetalleModoDatos.Text = "Los catálogos no se guardan al cerrar. Los presupuestos siguen en memoria.";
             //
             // btnServiciosAdicionales
             //
@@ -229,6 +296,7 @@ namespace proyecto_integrador.pantallas
             this.panelLateral.ResumeLayout(false);
             this.panelMarca.ResumeLayout(false);
             this.panelMarca.PerformLayout();
+            this.panelModoDatos.ResumeLayout(false);
             this.panelPrincipal.ResumeLayout(false);
             this.panelEncabezado.ResumeLayout(false);
             this.panelEncabezado.PerformLayout();

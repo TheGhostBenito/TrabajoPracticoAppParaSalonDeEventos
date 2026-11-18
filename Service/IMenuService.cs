@@ -1,14 +1,9 @@
-﻿using System.Collections.Generic;
-using proyecto_integrador.dto;
+﻿using proyecto_integrador.dto;
 
 namespace proyecto_integrador.Service
 {
     // Contrato del service de menús de comida.
-    public interface IMenuService
+    public interface IMenuService : IService<MenuDto, MenuDto>
     {
-        List<MenuDto> ObtenerTodos();
-        void Crear(MenuDto menu);
-        bool Modificar(MenuDto menu);
-        bool Eliminar(int id);
     }
 }

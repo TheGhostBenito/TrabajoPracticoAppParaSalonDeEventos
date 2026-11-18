@@ -1,7 +1,6 @@
 using System;
 using System.Windows.Forms;
 using proyecto_integrador.controller;
-using proyecto_integrador.dto;
 using proyecto_integrador.models;
 using proyecto_integrador.pantallas;
 using proyecto_integrador.repository;
@@ -21,36 +20,40 @@ namespace proyecto_integrador
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Repositorios (cada uno es un Singleton). Todos se usan por la misma interfaz genérica IRepository<T>
-            IRepository<Salon> salonRepository = SalonMySqlRepository.Instance;
-            IRepository<MenuDeComida> menuRepository = MenuMySqlRepository.Instance;
-            IRepository<ServiciosAdicionales> serviciosRepository = ServiciosAdicionalesMySqlRepository.Instance;
+            // Modo inicial de los catálogos: se lee de App.config, pero se puede
+            // cambiar en caliente desde la solapa izquierda. Guardar ya no requiere
+            // servidor: se usa un archivo XML en la carpeta local del usuario.
+            ServicioModoDatos servicioModo = ServicioModoDatos.Instance;
+            RepositoriosCatalogo catalogos = FabricaRepositoriosCatalogo.Crear(servicioModo);
+
+            // Repositorios: todos se usan por la interfaz genérica IRepository<T>.
             IRepository<Presupuesto> presupuestoRepository = PresupuestoRepository.Instance;
 
-            // Services: reciben la interfaz genérica del repositorio
-            IService<SalonDto, SalonDto> salonService = new SalonService(salonRepository);
-            IService<MenuDto, MenuDto> menuService = new MenuService(menuRepository);
-            IService<ServicioAdicionalDto, ServicioAdicionalDto> serviciosService = new ServiciosAdicionalesService(serviciosRepository);
-            PresupuestoPdfService pdfService = new PresupuestoPdfService();
-            PresupuestoService presupuestoService = new PresupuestoService(
+            // Services: reciben interfaces, nunca clases concretas.
+            ISalonService salonService = new SalonService(catalogos.Salones);
+            IMenuService menuService = new MenuService(catalogos.Menues);
+            IServiciosAdicionalesService serviciosService = new ServiciosAdicionalesService(catalogos.Servicios);
+            IPresupuestoPdfService pdfService = new PresupuestoPdfService();
+            IPresupuestoService presupuestoService = FabricaPresupuestoService.Crear(
                 presupuestoRepository,
-                salonRepository,
-                menuRepository,
-                serviciosRepository,
+                catalogos.Salones,
+                catalogos.Menues,
+                catalogos.Servicios,
                 pdfService);
 
-            // Controllers: reciben el service
+            // Controllers: reciben el service por su interfaz.
             SalonController salonController = new SalonController(salonService);
             MenuController menuController = new MenuController(menuService);
             ServiciosAdicionalesController serviciosController = new ServiciosAdicionalesController(serviciosService);
             PresupuestoController presupuestoController = new PresupuestoController(presupuestoService);
 
-            // Vista principal: recibe los controllers
+            // Vista principal: recibe los controllers.
             Application.Run(new SolapaIzquierdaForm(
                 salonController,
                 menuController,
                 serviciosController,
-                presupuestoController));
+                presupuestoController,
+                servicioModo));
         }
     }
 }

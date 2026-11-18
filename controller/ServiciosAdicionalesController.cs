@@ -10,10 +10,10 @@ namespace proyecto_integrador.controller
     {
         // Service utilizado para gestionar los servicios adicionales.
         // Se asigna una sola vez en el constructor
-        private readonly IService<ServicioAdicionalDto, ServicioAdicionalDto> _service;
+        private readonly IServiciosAdicionalesService _service;
 
         // Recibe el Service mediante inyección de dependencias
-        public ServiciosAdicionalesController(IService<ServicioAdicionalDto, ServicioAdicionalDto> service)
+        public ServiciosAdicionalesController(IServiciosAdicionalesService service)
         {
             if (service == null)
             {

@@ -6,7 +6,7 @@ using proyecto_integrador.Service;
 using System;
 using System.Collections.Generic;
 
-public class SalonService : IService<SalonDto, SalonDto>
+public class SalonService : ISalonService
 {
     // repositorio utilizado para acceder a los datos de los salones
     private readonly IRepository<Salon> _repo;

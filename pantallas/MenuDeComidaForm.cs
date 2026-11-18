@@ -46,6 +46,12 @@ namespace proyecto_integrador.pantallas
             dgvMenusCreados.ClearSelection();
         }
 
+        // Se usa cuando se cambia el modo de guardado de los catálogos desde la solapa izquierda.
+        public void RecargarDatos()
+        {
+            CargarGrilla();
+        }
+
         // Al hacer clic en una fila, se cargan sus datos en los textbox
         private void dgvMenusCreados_CellClick(object sender, DataGridViewCellEventArgs e)
         {

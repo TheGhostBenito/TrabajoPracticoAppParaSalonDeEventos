@@ -37,6 +37,12 @@ namespace proyecto_integrador.pantallas
             dgvServiciosCreados.ClearSelection();
         }
 
+        // Se usa cuando se cambia el modo de guardado de los catálogos desde la solapa izquierda.
+        public void RecargarDatos()
+        {
+            CargarServicios();
+        }
+
         private void dgvServiciosCreados_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0)
