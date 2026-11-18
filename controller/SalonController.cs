@@ -7,9 +7,9 @@ namespace proyecto_integrador.controller
 {
     public sealed class SalonController
     {
-        private readonly IService<SalonDto, SalonDto> _service;
+        private readonly ISalonService _service;
 
-        public SalonController(IService<SalonDto, SalonDto> service)
+        public SalonController(ISalonService service)
         {
             if (service == null)
             {

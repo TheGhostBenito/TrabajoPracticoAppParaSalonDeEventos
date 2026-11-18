@@ -27,6 +27,10 @@ namespace proyecto_integrador.dto
         public decimal PorcentajeAdicionalMenuPersonalizado { get; set; }
         public List<DetalleMenuPresupuestoDto> Menues { get; set; }
         public List<ServicioAdicionalDto> ServiciosAdicionales { get; set; }
+
+        // Lista genérica:_acá aparecen también los ítems que se agreguen en el futuro.
+        public List<ItemPresupuestoDto> Items { get; set; }
+
         public decimal CostoSalon { get; set; }
         public decimal SubtotalMenusPrincipales { get; set; }
         public decimal RecargoMenusPrincipales { get; set; }
@@ -34,6 +38,7 @@ namespace proyecto_integrador.dto
         public decimal RecargoMenusPersonalizados { get; set; }
         public decimal CostoMenus { get; set; }
         public decimal CostoServiciosAdicionales { get; set; }
+        public decimal CostoOtrosItems { get; set; }
         public decimal TotalFinal { get; set; }
         public string RutaPdf { get; set; }
 
@@ -41,6 +46,7 @@ namespace proyecto_integrador.dto
         {
             Menues = new List<DetalleMenuPresupuestoDto>();
             ServiciosAdicionales = new List<ServicioAdicionalDto>();
+            Items = new List<ItemPresupuestoDto>();
         }
     }
 }

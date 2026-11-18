@@ -2,16 +2,15 @@
 using proyecto_integrador.Service;
 using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
 
 namespace proyecto_integrador.controller
 {
     // El Controller solo recibe lo que manda la vista y se lo pasa al Service. No calcula ni valida nada.
     public sealed class PresupuestoController
     {
-        private readonly PresupuestoService _service;
+        private readonly IPresupuestoService _service;
 
-        public PresupuestoController(PresupuestoService service)
+        public PresupuestoController(IPresupuestoService service)
         {
             if (service == null)
             {

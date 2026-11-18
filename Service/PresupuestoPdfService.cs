@@ -11,7 +11,7 @@ namespace proyecto_integrador.Service
     // no usa ninguna librería externa: arma el PDF , escrbiendo el texto
     // línea por línea con el formato que exige un archivo pdf
     // Es una clase normal (no estática): el PresupuestoService la recibe por constructor
-    public class PresupuestoPdfService
+    public class PresupuestoPdfService : IPresupuestoPdfService
     {
         private const int LineasPorPagina = 48;
 
@@ -143,21 +143,22 @@ namespace proyecto_integrador.Service
             lineas.Add("Invitados: " + presupuesto.Evento.CantidadAdultos.ToString(CultureInfo.InvariantCulture)
                 + " adultos y " + presupuesto.Evento.CantidadNinos.ToString(CultureInfo.InvariantCulture) + " niños");
             lineas.Add(string.Empty);
-            lineas.Add("MENÚS");
+            lineas.Add("CONCEPTOS");
 
-            foreach (DetalleDeMenus detalle in presupuesto.Menues)
+            if (presupuesto.Items.Count == 0)
             {
-                string exclusiones = "menú principal";
-                if (detalle.ExclusionDelMenu != TipoDeExclusionDeMenu.Ninguna)
+                lineas.Add("Sin conceptos cargados.");
+            }
+            else
+            {
+                // El PDF recorre la lista polimórfica: un ítem nuevo aparece
+                // acá sin tener que tocar este servicio.
+                foreach (ItemPresupuesto item in presupuesto.Items)
                 {
-                    exclusiones = "particularidad: " + detalle.ExclusionDelMenu.ToString();
+                    AgregarLineaEnRenglones(lineas,
+                        item.ObtenerDetalle() + ": "
+                        + item.CalcularSubtotal().ToString("C2", CultureInfo.CurrentCulture));
                 }
-
-                string descripcion = detalle.MenuElegido.Nombre + " (" + exclusiones + "): "
-                    + detalle.CantidadAdultos.ToString(CultureInfo.InvariantCulture) + " adultos, "
-                    + detalle.CantidadNinos.ToString(CultureInfo.InvariantCulture) + " niños; subtotal "
-                    + detalle.CalcularSubtotal().ToString("C2", CultureInfo.CurrentCulture);
-                AgregarLineaEnRenglones(lineas, descripcion);
             }
 
             lineas.Add("Subtotal menús principales: " + presupuesto.SubtotalMenusPrincipales.ToString("C2", CultureInfo.CurrentCulture));
@@ -167,23 +168,13 @@ namespace proyecto_integrador.Service
             lineas.Add("Adicional menú personalizado (" + presupuesto.PorcentajeAdicionalMenuPersonalizado.ToString("0.##", CultureInfo.CurrentCulture)
                 + "%): " + presupuesto.RecargoMenusPersonalizados.ToString("C2", CultureInfo.CurrentCulture));
             lineas.Add("Total menús: " + presupuesto.CostoMenus.ToString("C2", CultureInfo.CurrentCulture));
-            lineas.Add(string.Empty);
-            lineas.Add("SERVICIOS ADICIONALES");
-
-            if (presupuesto.ServiciosAdicionales.Count == 0)
-            {
-                lineas.Add("Sin servicios adicionales.");
-            }
-            else
-            {
-                foreach (ServiciosAdicionales servicio in presupuesto.ServiciosAdicionales)
-                {
-                    AgregarLineaEnRenglones(lineas,
-                        servicio.Descripcion + ": " + servicio.CostoDelServicio.ToString("C2", CultureInfo.CurrentCulture));
-                }
-            }
-
             lineas.Add("Subtotal de servicios: " + presupuesto.CostoServiciosAdicionales.ToString("C2", CultureInfo.CurrentCulture));
+
+            if (presupuesto.CostoOtrosItems != 0m)
+            {
+                lineas.Add("Otros conceptos: " + presupuesto.CostoOtrosItems.ToString("C2", CultureInfo.CurrentCulture));
+            }
+
             lineas.Add(string.Empty);
             lineas.Add("Salón: " + presupuesto.CostoSalon.ToString("C2", CultureInfo.CurrentCulture));
             lineas.Add("TOTAL FINAL: " + presupuesto.TotalFinal.ToString("C2", CultureInfo.CurrentCulture));

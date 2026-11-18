@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using proyecto_integrador.controller;
 using proyecto_integrador.dto;
+using proyecto_integrador.repository;
 
 namespace proyecto_integrador.pantallas
 {
@@ -18,6 +19,8 @@ namespace proyecto_integrador.pantallas
         private readonly MenuController _menuController;
         private readonly ServiciosAdicionalesController _serviciosController;
         private readonly PresupuestoController _presupuestoController;
+        private readonly ServicioModoDatos _modoDatos;
+        private bool _actualizandoModoDatos;
         private Button botonCancelarPresupuesto;
         private Button botonSeccionActiva;
 
@@ -32,7 +35,8 @@ namespace proyecto_integrador.pantallas
             SalonController salonController,
             MenuController menuController,
             ServiciosAdicionalesController serviciosController,
-            PresupuestoController presupuestoController)
+            PresupuestoController presupuestoController,
+            ServicioModoDatos modoDatos)
             : this()
         {
             if (salonController == null)
@@ -55,13 +59,20 @@ namespace proyecto_integrador.pantallas
                 throw new ArgumentNullException("presupuestoController");
             }
 
+            if (modoDatos == null)
+            {
+                throw new ArgumentNullException("modoDatos");
+            }
+
             _salonController = salonController;
             _menuController = menuController;
             _serviciosController = serviciosController;
             _presupuestoController = presupuestoController;
+            _modoDatos = modoDatos;
 
             CrearAccionCancelarPresupuesto();
             CrearPantallaInicio();
+            ActualizarControlesModoDatos();
             MostrarInicio();
         }
 
@@ -166,6 +177,132 @@ namespace proyecto_integrador.pantallas
             pantallaInicio.Controls.Add(tarjetaConsulta);
 
             panelContenido.Controls.Add(pantallaInicio);
+        }
+
+        private void ActualizarControlesModoDatos()
+        {
+            if (_modoDatos == null)
+            {
+                return;
+            }
+
+            _actualizandoModoDatos = true;
+            try
+            {
+                bool guardandoEnArchivo = _modoDatos.ModoActual == ModoDatos.ArchivoLocal;
+                chkModoDatos.Checked = guardandoEnArchivo;
+                chkModoDatos.Text = guardandoEnArchivo
+                    ? "Usando archivo local (guardar)"
+                    : "Usando memoria (no guardar)";
+                chkModoDatos.BackColor = guardandoEnArchivo
+                    ? Color.FromArgb(48, 99, 157)
+                    : Color.FromArgb(90, 102, 120);
+                chkModoDatos.ForeColor = Color.White;
+                lblDetalleModoDatos.Text = guardandoEnArchivo
+                    ? "Los catálogos se guardan en este equipo. Los presupuestos siguen en memoria."
+                    : "Los catálogos no se guardan al cerrar. Los presupuestos siguen en memoria.";
+            }
+            finally
+            {
+                _actualizandoModoDatos = false;
+            }
+        }
+
+        private void chkModoDatos_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_actualizandoModoDatos || _modoDatos == null)
+            {
+                return;
+            }
+
+            ModoDatos modoSolicitado = chkModoDatos.Checked
+                ? ModoDatos.ArchivoLocal
+                : ModoDatos.Memoria;
+
+            if (modoSolicitado == _modoDatos.ModoActual)
+            {
+                return;
+            }
+
+            if (formularioPresupuesto != null && !formularioPresupuesto.IsDisposed)
+            {
+                DialogResult respuesta = MessageBox.Show(
+                    "Hay un presupuesto en edición. Al cambiar el modo de catálogos se cerrará ese formulario para evitar mezclar datos. ¿Continuar?",
+                    "Cambiar modo de datos",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (respuesta != DialogResult.Yes)
+                {
+                    RestaurarEstadoModoDatos();
+                    return;
+                }
+            }
+
+            if (!_modoDatos.Cambiar(modoSolicitado))
+            {
+                RestaurarEstadoModoDatos();
+                MessageBox.Show(
+                    "No se pudo activar el modo seleccionado. El cambio no se aplicó.",
+                    "Modo de datos",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+
+            if (formularioPresupuesto != null && !formularioPresupuesto.IsDisposed)
+            {
+                formularioPresupuesto.Dispose();
+                formularioPresupuesto = null;
+                MostrarInicio();
+            }
+
+            ActualizarControlesModoDatos();
+            RecargarCatalogosAbiertos();
+
+            MessageBox.Show(
+                modoSolicitado == ModoDatos.ArchivoLocal
+                    ? "Los catálogos ahora se guardan en un archivo local."
+                    : "Los catálogos ahora se usan solo en memoria.",
+                "Modo de datos actualizado",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        private void RestaurarEstadoModoDatos()
+        {
+            if (_modoDatos == null)
+            {
+                return;
+            }
+
+            _actualizandoModoDatos = true;
+            try
+            {
+                chkModoDatos.Checked = _modoDatos.ModoActual == ModoDatos.ArchivoLocal;
+            }
+            finally
+            {
+                _actualizandoModoDatos = false;
+            }
+        }
+
+        private void RecargarCatalogosAbiertos()
+        {
+            if (formularioSalon != null && !formularioSalon.IsDisposed)
+            {
+                formularioSalon.RecargarDatos();
+            }
+
+            if (formularioMenu != null && !formularioMenu.IsDisposed)
+            {
+                formularioMenu.RecargarDatos();
+            }
+
+            if (formularioServiciosAdicionales != null && !formularioServiciosAdicionales.IsDisposed)
+            {
+                formularioServiciosAdicionales.RecargarDatos();
+            }
         }
 
         private void btnInicio_Click(object sender, EventArgs e)

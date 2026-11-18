@@ -7,7 +7,7 @@ using proyecto_integrador.Service;
 using System;
 using System.Collections.Generic;
 
-public class MenuService : IService<MenuDto, MenuDto>
+public class MenuService : IMenuService
 {
     // Repositorio utilizado para acceder a los datos de los menús
     private readonly IRepository<MenuDeComida> _repo;

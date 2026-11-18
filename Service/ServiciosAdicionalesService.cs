@@ -7,7 +7,7 @@ using proyecto_integrador.Service;
 using System;
 using System.Collections.Generic;
 
-public class ServiciosAdicionalesService : IService<ServicioAdicionalDto, ServicioAdicionalDto>
+public class ServiciosAdicionalesService : IServiciosAdicionalesService
 {
     // Repositorio utilizado para acceder a los datos
     private readonly IRepository<ServiciosAdicionales> _repo;
