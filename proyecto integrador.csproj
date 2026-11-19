@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>proyecto_integrador</RootNamespace>
     <AssemblyName>proyecto integrador</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -110,6 +110,7 @@
     <Compile Include="repository\CatalogosLocales.cs" />
     <Compile Include="repository\FabricaRepositoriosCatalogo.cs" />
     <Compile Include="repository\IRepository.cs" />
+    <Compile Include="repository\MapeadorPresupuestoXml.cs" />
     <Compile Include="repository\ModoDatos.cs" />
     <Compile Include="repository\RepositorioCatalogoConmutable.cs" />
     <Compile Include="repository\RepositorioCatalogoLocal.cs" />

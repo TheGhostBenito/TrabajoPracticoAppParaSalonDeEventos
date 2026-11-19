@@ -33,6 +33,12 @@ namespace proyecto_integrador.repository
             return string.IsNullOrEmpty(directorio) ? Directorio : directorio;
         }
 
+        // Ruta compartida por todos los archivos locales (catálogos y presupuestos).
+        public static string ObtenerRutaArchivo(string nombreArchivo, string directorio = null)
+        {
+            return Path.Combine(ObtenerDirectorio(directorio), nombreArchivo);
+        }
+
         public static IRepository<Salon> CrearRepositorioSalones(string directorio = null)
         {
             List<Salon> semilla = new List<Salon>();

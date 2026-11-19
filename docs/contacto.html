@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Contacto para solicitar modificaciones y versiones personalizadas del sistema de presupuestos para eventos." />
+  <title>Contacto · Presupuestos de Eventos</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%232f6fb5%22/><text y=%22.75em%22 x=%22.1em%22 font-size=%2260%22>✉️</text></svg>" />
+  <link rel="stylesheet" href="assets/css/estilos.css" />
+  <script src="assets/js/contacto.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="index.html" aria-label="Inicio">
+      <span class="brand-mark">🎉</span>
+      <span class="brand-text">Presupuestos Eventos<small>TP integrador · WinForms</small></span>
+    </a>
+    <nav class="nav" aria-label="Navegación principal">
+      <a href="index.html">Demostración</a>
+      <a href="documentacion.html">Arquitectura</a>
+      <a class="nav-cta" href="contacto.html" aria-current="page">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="contact-hero container">
+    <span class="eyebrow">Trabajemos juntos</span>
+    <h1>¿Necesitás adaptar el programa?</h1>
+    <p>El proyecto está listo para crecer. Si querés una versión con otros rubros, campos, reportes o integraciones, escribime y vemos cómo hacerlo.</p>
+  </section>
+
+  <section class="section" style="padding-top:12px">
+    <div class="container">
+      <div class="email-card">
+        <small>Escribime directamente</small>
+        <a class="big-email" href="mailto:alteffjoaquin@gmail.com">alteffjoaquin@gmail.com</a>
+        <button class="btn btn-primary btn-small" type="button" id="copiarCorreo">📋 Copiar correo</button>
+      </div>
+
+      <div class="contact-grid">
+        <article class="card">
+          <span class="icon-badge teal">💡</span>
+          <h3>Qué puedo adaptar</h3>
+          <p>El diseño ya está preparado para agregar cosas sin romper lo existente. Algunos ejemplos concretos:</p>
+          <div class="chip-list">
+            <span class="chip">Nuevos tipos de ítem</span>
+            <span class="chip">Otros catálogos</span>
+            <span class="chip">PDF personalizado</span>
+            <span class="chip">Validaciones a medida</span>
+            <span class="chip">Multi-moneda</span>
+            <span class="chip">Múltiples usuarios</span>
+            <span class="chip">Base de datos</span>
+            <span class="chip">Otros idiomas</span>
+          </div>
+          <div style="height:18px"></div>
+          <div class="note">
+            <strong>Cómo funciona:</strong> contame qué necesitás, te devuelvo una propuesta concreta con alcance y
+            presupuesto para esa modificación puntual.
+          </div>
+        </article>
+
+        <article class="card contact-form">
+          <h3 style="margin-top:0">Enviarme un mensaje</h3>
+          <p>Completá los campos y se abrirá tu cliente de correo con el mensaje listo.</p>
+          <form id="formularioContacto">
+            <div class="field">
+              <label for="cf-nombre">Tu nombre</label>
+              <input type="text" id="cf-nombre" name="nombre" placeholder="Nombre y apellido" required />
+            </div>
+            <div class="field">
+              <label for="cf-correo">Tu correo</label>
+              <input type="email" id="cf-correo" name="correo" placeholder="nombre@ejemplo.com" required />
+            </div>
+            <div class="field">
+              <label for="cf-tipo">Qué querés modificar</label>
+              <select id="cf-tipo" name="tipo">
+                <option>Agregar nuevos ítems o catálogos</option>
+                <option>Personalizar el PDF / informes</option>
+                <option>Adaptar validaciones y reglas de negocio</option>
+                <option>Múltiples usuarios o base de datos</option>
+                <option>Otra versión a medida</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cf-mensaje">Contame el detalle</label>
+              <textarea id="cf-mensaje" name="mensaje" placeholder="¿Qué necesitás que haga la nueva versión?" required></textarea>
+            </div>
+            <button class="btn btn-blue" type="submit">✉️ Abrir correo con el mensaje</button>
+            <p class="form-hint">Este formulario no guarda datos en ningún servidor: solo arma un <code>mailto:</code>.</p>
+          </form>
+        </article>
+      </div>
+
+      <div style="height:26px"></div>
+      <div class="grid-3">
+        <article class="card">
+          <span class="step-num">1</span>
+          <h3>Contás la necesidad</h3>
+          <p>Qué cambiaría, para quién sería y qué resultado esperás.</p>
+        </article>
+        <article class="card">
+          <span class="step-num">2</span>
+          <h3>Definimos el alcance</h3>
+          <p>Se detallan los archivos, validaciones y pruebas involucradas.</p>
+        </article>
+        <article class="card">
+          <span class="step-num">3</span>
+          <h3>Entregamos la versión</h3>
+          <p>La modificación se integra al proyecto y se verifica con compilación y pruebas.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span><strong>Presupuestos Eventos</strong> · Trabajo Práctico Integrador</span>
+    <span><a href="index.html">Demostración</a> · <a href="documentacion.html">Arquitectura</a></span>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>

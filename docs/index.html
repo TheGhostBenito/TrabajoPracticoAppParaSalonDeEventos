@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Demostración visual del sistema de presupuestos para eventos: catálogos, cálculo polimórfico, historial local y exportación a PDF." />
+  <title>Presupuestos de Eventos · Demostración</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%232f6fb5%22/><text y=%22.75em%22 x=%22.1em%22 font-size=%2265%22>🎉</text></svg>" />
+  <link rel="stylesheet" href="assets/css/estilos.css" />
+  <script src="assets/js/demo.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="index.html" aria-label="Inicio">
+      <span class="brand-mark">🎉</span>
+      <span class="brand-text">Presupuestos Eventos<small>TP integrador · WinForms</small></span>
+    </a>
+    <nav class="nav" aria-label="Navegación principal">
+      <a href="index.html" aria-current="page">Demostración</a>
+      <a href="documentacion.html">Arquitectura</a>
+      <a class="nav-cta" href="contacto.html">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow">Sistema de escritorio · C# / .NET Framework</span>
+        <h1>De la idea del evento al presupuesto en PDF</h1>
+        <p class="lead">
+          Una aplicación WinForms que arma presupuestos con salón, menús y servicios adicionales, calcula el total
+          con reglas de negocio y guarda el historial en el equipo. Recorré abajo cómo funciona concretamente.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#demo">▶ Ver demostración interactiva</a>
+          <a class="btn btn-ghost" href="documentacion.html">📘 Leer arquitectura</a>
+          <a class="btn btn-ghost" href="assets/descargas/PresupuestosEventos-v1.0-Windows.zip" download>⬇️ Descargar .exe</a>
+        </div>
+      </div>
+      <aside class="hero-card" aria-label="Resumen del sistema">
+        <h3>En números</h3>
+        <div class="hero-stat"><span>Ítems polimórficos</span><strong>3 tipos</strong></div>
+        <div class="hero-stat"><span>PresupuestoService</span><strong>753 → 252 líneas</strong></div>
+        <div class="hero-stat"><span>Paquetes NuGet</span><strong>0</strong></div>
+        <div class="hero-stat"><span>Servidores necesarios</span><strong>0</strong></div>
+        <div class="hero-stat"><span>Datos guardados</span><strong>XML local</strong></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="que-hace">
+    <div class="container">
+      <div class="section-head">
+        <h2>Qué hace concretamente</h2>
+        <p>Cuatro pasos, sin servidores ni configuraciones externas.</p>
+      </div>
+      <div class="grid-4">
+        <article class="card">
+          <span class="icon-badge">🏛️</span>
+          <h3>1. Carga los catálogos</h3>
+          <p>Salones, menús y servicios adicionales se mantienen en memoria o en archivos XML según el interruptor.</p>
+        </article>
+        <article class="card">
+          <span class="icon-badge teal">🧮</span>
+          <h3>2. Arma el presupuesto</h3>
+          <p>Selecciona salón, duración, menús por adulto/niño, particularidades y servicios. La vista solo Envía datos.</p>
+        </article>
+        <article class="card">
+          <span class="icon-badge amber">📊</span>
+          <h3>3. Calcula con reglas</h3>
+          <p>Cada ítem sabe su subtotal por polimorfismo. El total final surge de sumarlos, sin fórmulas duplicadas.</p>
+        </article>
+        <article class="card">
+          <span class="icon-badge">📄</span>
+          <h3>4. Guarda y exporta</h3>
+          <p>El historial persiste en <code>presupuestos.xml</code> y cualquier presupuesto se exporta a PDF sin librerías externas.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="demo">
+    <div class="container">
+      <div class="section-head">
+        <h2>Demostración interactiva</h2>
+        <p>Esta recreación reproduce la ventana, el menú lateral, el interruptor de catálogos y el cálculo real del modelo. Probala: lo que guardes queda en tu navegador.</p>
+      </div>
+
+      <div class="demo-shell">
+        <div class="window-bar">
+          <div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          <span class="window-title">Presupuestos de Eventos — Vista principal</span>
+          <span class="window-badge">Simulación web</span>
+        </div>
+
+        <div class="demo-body">
+          <aside class="demo-sidebar" aria-label="Menú de la aplicación">
+            <div class="side-label">Navegación</div>
+            <button class="tab-btn active" type="button" data-tab="inicio"><span class="ico">🏠</span> Inicio</button>
+            <button class="tab-btn" type="button" data-tab="salones"><span class="ico">🏛️</span> Salones</button>
+            <button class="tab-btn" type="button" data-tab="menues"><span class="ico">🍽️</span> Menús</button>
+            <button class="tab-btn" type="button" data-tab="servicios"><span class="ico">🎵</span> Servicios</button>
+            <button class="tab-btn" type="button" data-tab="presupuesto"><span class="ico">📝</span> Presupuesto</button>
+            <button class="tab-btn" type="button" data-tab="historial"><span class="ico">🕘</span> Historial</button>
+
+            <div class="mode-panel">
+              <strong>Datos del catálogo</strong>
+              <div class="switch-row">
+                <span class="mode-text" id="modoTexto"><b>Usando memoria</b>no guardar</span>
+                <label class="switch" title="Alternar entre memoria y archivo local">
+                  <input type="checkbox" id="modoSwitch" aria-label="Guardar catálogos en archivo local" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <p class="mode-hint" id="modoHint">Los catálogos viven solo durante la sesión.</p>
+            </div>
+          </aside>
+
+          <div class="demo-main">
+            <!-- INICIO -->
+            <section class="demo-panel active" id="panel-inicio" aria-label="Inicio">
+              <h3>Bienvenido</h3>
+              <p class="sub">Así se ve el flujo completo dentro de la aplicación de escritorio.</p>
+              <div class="mini-grid">
+                <div class="mini-card"><small>Catálogos</small><b id="statCatalogos">3 · 3 · 3</b></div>
+                <div class="mini-card"><small>Modo actual</small><b id="statModo">Memoria</b></div>
+                <div class="mini-card"><small>Presupuestos guardados</small><b id="statHistorial">0</b></div>
+                <div class="mini-card"><small>Destino del historial</small><b>XML local</b></div>
+              </div>
+              <div style="height:16px"></div>
+              <div class="note">
+                <strong>Probá esto:</strong> mové el interruptor “Datos del catálogo” y volvé a las pestañas de Salones,
+                Menús o Servicios. Después cargá un presupuesto, guardalo y mirá el Historial.
+              </div>
+              <div class="demo-actions">
+                <button class="btn btn-blue btn-small" type="button" data-go="presupuesto">Armar un presupuesto →</button>
+              </div>
+            </section>
+
+            <!-- SALONES -->
+            <section class="demo-panel" id="panel-salones" aria-label="Salones">
+              <h3>Salones</h3>
+              <p class="sub" id="subSalones">Catálogo en memoria: se reinicia al cerrar.</p>
+              <div class="table-wrap">
+                <table class="data">
+                  <thead><tr><th>ID</th><th>Nombre</th><th>Ubicación</th><th class="num">Costo base / hora</th></tr></thead>
+                  <tbody id="tablaSalones"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- MENUES -->
+            <section class="demo-panel" id="panel-menues" aria-label="Menús">
+              <h3>Menús</h3>
+              <p class="sub" id="subMenues">Cada menú tiene precio por adulto y por niño.</p>
+              <div class="table-wrap">
+                <table class="data">
+                  <thead><tr><th>ID</th><th>Nombre</th><th class="num">Adulto</th><th class="num">Niño</th></tr></thead>
+                  <tbody id="tablaMenues"></tbody>
+                </table>
+              </div>
+              <div class="note" style="margin-top:14px">
+                Las particularidades (Celíaco, Vegetariano, Diabético, Vegano) se eligen al armar el presupuesto.
+              </div>
+            </section>
+
+            <!-- SERVICIOS -->
+            <section class="demo-panel" id="panel-servicios" aria-label="Servicios adicionales">
+              <h3>Servicios adicionales</h3>
+              <p class="sub" id="subServicios">Se pueden tomar del catálogo o escribir uno personalizado.</p>
+              <div class="table-wrap">
+                <table class="data">
+                  <thead><tr><th>ID</th><th>Descripción</th><th class="num">Monto fijo</th></tr></thead>
+                  <tbody id="tablaServicios"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- PRESUPUESTO -->
+            <section class="demo-panel" id="panel-presupuesto" aria-label="Armar presupuesto">
+              <h3>Armar presupuesto</h3>
+              <p class="sub">La vista solo junta datos; el cálculo lo hace el modelo.</p>
+
+              <div class="form-grid">
+                <div class="field">
+                  <label for="selSalon">Salón</label>
+                  <select id="selSalon"></select>
+                </div>
+                <div class="field">
+                  <label for="inpDuracion">Duración (horas)</label>
+                  <input type="number" id="inpDuracion" min="1" max="24" value="4" />
+                </div>
+                <div class="field">
+                  <label for="selMenu">Menú</label>
+                  <select id="selMenu"></select>
+                </div>
+                <div class="field">
+                  <label for="selExclusion">Particularidad</label>
+                  <select id="selExclusion">
+                    <option value="Ninguna">Ninguna (menú principal)</option>
+                    <option value="Celiaco">Celíaco</option>
+                    <option value="Vegetariano">Vegetariano</option>
+                    <option value="Diabetico">Diabético</option>
+                    <option value="Vegano">Vegano</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="inpAdultos">Adultos</label>
+                  <input type="number" id="inpAdultos" min="0" value="30" />
+                </div>
+                <div class="field">
+                  <label for="inpNinos">Niños</label>
+                  <input type="number" id="inpNinos" min="0" value="10" />
+                </div>
+                <div class="field full">
+                  <label>Servicios adicionales</label>
+                  <div class="check-list" id="listaServicios"></div>
+                </div>
+                <div class="field">
+                  <label for="inpContacto">Nombre del contacto</label>
+                  <input type="text" id="inpContacto" value="Ana" />
+                </div>
+                <div class="field">
+                  <label for="inpEvento">Tipo de evento</label>
+                  <input type="text" id="inpEvento" value="Cumpleaños" />
+                </div>
+              </div>
+
+              <div class="total-box" aria-live="polite">
+                <div>
+                  <small>Total final estimado</small>
+                  <strong id="totalValor">$ 0,00</strong>
+                </div>
+                <div class="total-breakdown" id="desglose">Salón $ 0,00 · Menú $ 0,00 · Servicios $ 0,00</div>
+              </div>
+
+              <div class="demo-actions">
+                <button class="btn btn-primary btn-small" type="button" id="btnGuardar">💾 Guardar en historial</button>
+                <button class="btn btn-ghost btn-small" type="button" data-go="historial">Ver historial →</button>
+              </div>
+            </section>
+
+            <!-- HISTORIAL -->
+            <section class="demo-panel" id="panel-historial" aria-label="Historial">
+              <h3>Historial de presupuestos</h3>
+              <p class="sub">En la app real se guarda en <code>%LOCALAPPDATA%\EventosPresupuestos\presupuestos.xml</code>. Acá usamos el almacenamiento del navegador.</p>
+              <div id="historialContenido"></div>
+              <div class="demo-actions">
+                <button class="btn btn-ghost btn-small" type="button" id="btnLimpiarHistorial">Limpiar historial de la demo</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:18px">
+        <strong>Aclaración:</strong> esta página es una demostración visual del comportamiento. No ejecuta el
+        ejecutable de Windows ni reemplaza al sistema original; reproduce su interfaz y sus reglas de cálculo.
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="descargar">
+    <div class="container">
+      <div class="download-card">
+        <div>
+          <h3>⬇️ Probá el programa real</h3>
+          <p>Descargá el ejecutable de Windows. No necesita MySQL, XAMPP ni conexión a Internet. Incluye el archivo de configuración para .NET Framework 4.8.</p>
+        </div>
+        <div>
+          <a class="btn btn-blue" href="assets/descargas/PresupuestosEventos-v1.0-Windows.zip" download>Descargar ZIP</a>
+          <a class="btn btn-ghost" style="background:#fff;color:#245b96;border-color:#bcd8ea;margin-left:6px" href="documentacion.html#ejecutar">Ver cómo ejecutarlo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span><strong>Presupuestos Eventos</strong> · Trabajo Práctico Integrador</span>
+    <span><a href="documentacion.html">Arquitectura</a> · <a href="contacto.html">Contacto</a></span>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>

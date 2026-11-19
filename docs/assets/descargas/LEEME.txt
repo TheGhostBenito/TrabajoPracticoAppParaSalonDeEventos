@@ -1,0 +1,18 @@
+﻿PRESUPUESTOS DE EVENTOS - Version de Windows
+
+Requisitos: Windows con .NET Framework 4.8 (incluido en Windows 10/11).
+
+Uso:
+1. Extrae esta carpeta.
+2. Ejecuta PresupuestosEventos.exe.
+3. No necesita MySQL, XAMPP ni conexion a Internet.
+
+Datos guardados:
+%LOCALAPPDATA%\EventosPresupuestos\
+  salones.xml, menues.xml, servicios.xml, presupuestos.xml
+
+Codigo fuente:
+https://github.com/TheGhostBenito/TrabajoPracticoAppParaSalonDeEventos
+
+Contacto para versiones a medida:
+alteffjoaquin@gmail.com
