@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Estructura y arquitectura actual del sistema de presupuestos para eventos: capas, modelos, repositorios, servicios, persistencia y ejecución." />
+  <title>Arquitectura · Presupuestos de Eventos</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%232f6fb5%22/><text y=%22.75em%22 x=%22.1em%22 font-size=%2265%22>📘</text></svg>" />
+  <link rel="stylesheet" href="assets/css/estilos.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="index.html" aria-label="Inicio">
+      <span class="brand-mark">🎉</span>
+      <span class="brand-text">Presupuestos Eventos<small>TP integrador · WinForms</small></span>
+    </a>
+    <nav class="nav" aria-label="Navegación principal">
+      <a href="index.html">Demostración</a>
+      <a href="documentacion.html" aria-current="page">Arquitectura</a>
+      <a class="nav-cta" href="contacto.html">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" style="padding:48px 0 56px">
+    <div class="container">
+      <span class="eyebrow">Estructura del proyecto</span>
+      <h1>Cómo está hecho el programa</h1>
+      <p class="lead">Recorrido por las capas, los modelos, los repositorios, los servicios y el flujo completo de un presupuesto, desde el formulario hasta el PDF.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="download-card">
+        <div>
+          <h3>⬇️ Ejecutable listo para usar</h3>
+          <p>Windows · .NET Framework 4.8 · sin MySQL, sin instaladores y sin restaurar paquetes.</p>
+        </div>
+        <div>
+          <a class="btn btn-blue" href="assets/descargas/PresupuestosEventos-v1.0-Windows.zip" download>Descargar ZIP</a>
+          <a class="btn btn-ghost" style="background:#fff;color:#245b96;border-color:#bcd8ea;margin-left:6px" href="assets/descargas/PresupuestosEventos.exe" download>Solo .exe</a>
+        </div>
+      </div>
+
+      <div class="docs-layout">
+        <aside class="docs-toc" aria-label="Índice de arquitectura">
+          <strong>Contenido</strong>
+          <ol>
+            <li><a href="#capas">Vista general por capas</a></li>
+            <li><a href="#carpetas">Estructura de carpetas</a></li>
+            <li><a href="#dominio">Modelo de dominio</a></li>
+            <li><a href="#contratos">DTOs y contratos</a></li>
+            <li><a href="#repositorios">Repositorios</a></li>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#controllers">Controllers</a></li>
+            <li><a href="#ui">Formularios</a></li>
+            <li><a href="#flujo">Flujo de un presupuesto</a></li>
+            <li><a href="#datos">Persistencia de datos</a></li>
+            <li><a href="#arranque">Arranque y configuración</a></li>
+            <li><a href="#pdf">Generación de PDF</a></li>
+            <li><a href="#reglas">Reglas de negocio</a></li>
+            <li><a href="#decisiones">Decisiones de diseño</a></li>
+            <li><a href="#ejecutar">Ejecutar el código</a></li>
+          </ol>
+        </aside>
+
+        <div>
+          <article class="doc-block" id="capas">
+            <h2>1. Vista general por capas</h2>
+            <p>La aplicación separa responsabilidades en cuatro capas. Cada capa conoce solo a la inmediatamente inferior y las dependencias se inyectan por constructor desde <code>Program.cs</code>.</p>
+            <div class="flow">
+              <span class="box">pantallas/ (WinForms)</span><span class="arrow">→</span>
+              <span class="box">controller/</span><span class="arrow">→</span>
+              <span class="box">Service/</span><span class="arrow">→</span>
+              <span class="box">repository/</span><span class="arrow">→</span>
+              <span class="box">models/ + dto/</span>
+            </div>
+            <ul>
+              <li><strong>Vista:</strong> captura datos y muestra resultados. No calcula ni accede a repositorios.</li>
+              <li><strong>Controller:</strong> traduce entre formularios y servicios.</li>
+              <li><strong>Service:</strong> contiene la lógica de negocio y orquesta el armado del presupuesto.</li>
+              <li><strong>Repository:</strong> abstrae dónde se guardan los datos (memoria o XML).</li>
+            </ul>
+          </article>
+
+          <article class="doc-block" id="carpetas">
+            <h2>2. Estructura de carpetas</h2>
+            <pre><code>proyecto integrador/
+├─ Program.cs              ← composition root (arma dependencias)
+├─ App.config              ← modo inicial de catálogos + .NET 4.8
+├─ models/                 ← entidades del dominio
+├─ dto/                    ← objetos de transferencia
+├─ Service/                ← interfaces + lógica de negocio
+├─ controller/             ← adaptadores para la UI
+├─ repository/             ← persistencia en memoria y XML
+├─ pantallas/              ← formularios WinForms
+└─ docs/                   ← sitio de GitHub Pages y descargas</code></pre>
+            <p>Todos los archivos <code>.cs</code> están declarados explícitamente en <code>proyecto integrador.csproj</code>. No hay dependencias NuGet.</p>
+          </article>
+
+          <article class="doc-block" id="dominio">
+            <h2>3. Modelo de dominio</h2>
+            <h3>Entidades principales</h3>
+            <ul>
+              <li><code>Salon</code>: id, nombre, ubicación y costo base por hora.</li>
+              <li><code>MenuDeComida</code>: id, nombre, precio por adulto y por niño.</li>
+              <li><code>ServiciosAdicionales</code>: id, descripción y monto fijo.</li>
+              <li><code>DetalleDeMenus</code>: cantidades, particularidad y menú elegido.</li>
+              <li><code>Evento</code>: duración, cantidad de adultos y niños.</li>
+              <li><code>Presupuesto</code>: datos del cliente, evento, porcentajes e ítems.</li>
+            </ul>
+
+            <h3>Jerarquía polimórfica de ítems</h3>
+            <pre><code>ItemPresupuesto  (abstracta)
+├─ CalcularSubtotal()
+├─ ObtenerDetalle()
+├─ ItemSalon      → Salon.CostoBase * DuracionHoras
+├─ ItemMenu       → DetalleDeMenus.CalcularSubtotal()
+└─ ItemServicio   → ServiciosAdicionales.CostoDelServicio</code></pre>
+            <p><code>Presupuesto</code> guarda una sola <code>List&lt;ItemPresupuesto&gt;</code>. El total final se obtiene sumando el subtotal de cada ítem sin preguntar su tipo. Las propiedades derivadas mantienen la compatibilidad con la vista y el PDF.</p>
+          </article>
+
+          <article class="doc-block" id="contratos">
+            <h2>4. DTOs y contratos</h2>
+            <p>Los DTOs son la forma en que los datos cruzan los límites de las capas:</p>
+            <ul>
+              <li><code>PresupuestoRequestDto</code>: lo que envía el formulario.</li>
+              <li><code>PresupuestoDto</code>: lo que recibe la vista, con su lista <code>Items</code>.</li>
+              <li><code>ItemPresupuestoDto</code>: representación uniforme de cada ítem.</li>
+              <li><code>SalonDto</code>, <code>MenuDto</code>, <code>ServicioAdicionalDto</code>: catálogos para los combos.</li>
+            </ul>
+            <p>Los contratos genéricos son <code>IRepository&lt;T&gt;</code> e <code>IService&lt;TDto,TRequest&gt;</code>. Sobre ellos se apoyan <code>ISalonService</code>, <code>IMenuService</code>, <code>IServiciosAdicionalesService</code>, <code>IPresupuestoService</code> e <code>IPresupuestoPdfService</code>.</p>
+          </article>
+
+          <article class="doc-block" id="repositorios">
+            <h2>5. Repositorios</h2>
+            <div class="table-wrap">
+              <table class="doc-table">
+                <thead><tr><th>Repositorio</th><th>Función</th></tr></thead>
+                <tbody>
+                  <tr><td><code>SalonRepository</code>, <code>MenuRepository</code>, <code>ServiciosAdicionalesRepository</code></td><td>Singletons en memoria con los datos de ejemplo.</td></tr>
+                  <tr><td><code>RepositorioCatalogoLocal&lt;T&gt;</code></td><td>Lee y escribe XML local para cada catálogo.</td></tr>
+                  <tr><td><code>RepositorioCatalogoConmutable&lt;T&gt;</code></td><td>Proxy que elige entre memoria y archivo según el modo actual.</td></tr>
+                  <tr><td><code>PresupuestoRepository</code></td><td>Singleton con caché en memoria y persistencia en <code>presupuestos.xml</code>.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p><code>CatalogosLocales</code> centraliza las rutas y el mapeo de atributos. <code>FabricaRepositoriosCatalogo</code> compone los proxies. <code>ServicioModoDatos</code> mantiene el estado del interruptor y avisa cuando cambia.</p>
+          </article>
+
+          <article class="doc-block" id="servicios">
+            <h2>6. Servicios</h2>
+            <p>Los servicios de catálogo exponen altas, bajas, modificaciones y listados. El servicio de presupuestos es el orquestador y delega en piezas pequeñas:</p>
+            <div class="table-wrap">
+              <table class="doc-table">
+                <thead><tr><th>Pieza</th><th>Responsabilidad</th></tr></thead>
+                <tbody>
+                  <tr><td><code>PresupuestoRequestValidator</code></td><td>Validación general de la solicitud.</td></tr>
+                  <tr><td><code>ConstructorItemSalon</code></td><td>Prepara, valida y crea el ítem de salón.</td></tr>
+                  <tr><td><code>ConstructorItemMenu</code></td><td>Menús principales y con particularidad.</td></tr>
+                  <tr><td><code>ConstructorItemServicio</code></td><td>Servicios de catálogo y personalizados.</td></tr>
+                  <tr><td><code>ContextoPresupuesto</code></td><td>Resuelve búsquedas en catálogos e ítems existentes.</td></tr>
+                  <tr><td><code>PresupuestoCatalogosService</code></td><td>Listados disponibles para los formularios.</td></tr>
+                  <tr><td><code>PresupuestoDtoMapper</code> + <code>ItemDtoMappers</code></td><td>Conversión de entidades a DTO.</td></tr>
+                  <tr><td><code>FabricaPresupuestoService</code></td><td>Compone todas las piezas.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>La estimación previa y el presupuesto guardado usan el mismo modelo, por lo que los importes siempre coinciden.</p>
+          </article>
+
+          <article class="doc-block" id="controllers">
+            <h2>7. Controllers</h2>
+            <p>Hay un controller por área: <code>SalonController</code>, <code>MenuController</code>, <code>ServiciosAdicionalesController</code> y <code>PresupuestoController</code>. Todos reciben interfaces de servicio por constructor y se limitan a adaptar llamadas.</p>
+          </article>
+
+          <article class="doc-block" id="ui">
+            <h2>8. Formularios</h2>
+            <ul>
+              <li><code>SolapaIzquierdaForm</code>: menú lateral con el bloque “Datos del catálogo”.</li>
+              <li><code>SalonForm</code>, <code>MenuDeComidaForm</code>, <code>ServiciosAdicionalesForm</code>: ABM de catálogos con <code>RecargarDatos()</code>.</li>
+              <li><code>PresupuestoForm</code>: armado del presupuesto; solo construye el DTO y muestra el resultado.</li>
+              <li><code>ConsultaPresupuestosForm</code>: historial y exportación a PDF.</li>
+            </ul>
+            <p>El interruptor de catálogos cambia el modo en caliente: no se reconstruyen controllers ni servicios. Si hay un presupuesto en edición, se pide confirmación antes de cerrarlo.</p>
+          </article>
+
+          <article class="doc-block" id="flujo">
+            <h2>9. Flujo de un presupuesto</h2>
+            <ol>
+              <li>El usuario completa <code>PresupuestoForm</code> y envía un <code>PresupuestoRequestDto</code>.</li>
+              <li><code>PresupuestoController</code> llama al servicio.</li>
+              <li>El validador revisa las reglas generales y los constructores validan cada ítem.</li>
+              <li><code>ContextoPresupuesto</code> resuelve salón, menú y servicios desde el catálogo vigente.</li>
+              <li>Se construye la <code>List&lt;ItemPresupuesto&gt;</code> y <code>Presupuesto.TotalFinal</code> la suma.</li>
+              <li><code>PresupuestoRepository</code> asigna el id, actualiza la caché y escribe el XML.</li>
+              <li>El DTO resultante vuelve a la vista. Desde el historial se puede exportar el PDF.</li>
+            </ol>
+          </article>
+
+          <article class="doc-block" id="datos">
+            <h2>10. Persistencia de datos</h2>
+            <p>Todo se guarda en <code>%LOCALAPPDATA%\EventosPresupuestos</code>:</p>
+            <ul>
+              <li><code>salones.xml</code>, <code>menues.xml</code>, <code>servicios.xml</code>: catálogos, según el interruptor.</li>
+              <li><code>presupuestos.xml</code>: historial, siempre.</li>
+            </ul>
+            <p>La serialización es manual con <code>System.Xml.Linq</code>. Los ítems polimórficos usan un discriminador <code>tipo</code> y cada presupuesto guarda un snapshot de salón, menú y servicio, de modo que los importes históricos no cambien si el catálogo se modifica después.</p>
+            <p>La escritura es atómica: se completa un <code>.tmp</code> y se reemplaza el archivo. Si el XML se corrompe, se crea una copia con fecha y se continúa con datos iniciales o historial vacío.</p>
+          </article>
+
+          <article class="doc-block" id="arranque">
+            <h2>11. Arranque y configuración</h2>
+            <p><code>Program.Main</code> es el composition root: crea el servicio de modo, arma los repositorios, los servicios y los controllers, e inyecta todo en los formularios.</p>
+            <p><code>App.config</code> solo define el modo inicial de catálogos:</p>
+            <pre><code>&lt;appSettings&gt;
+  &lt;add key="ModoCatalogos" value="Memoria" /&gt;
+&lt;/appSettings&gt;</code></pre>
+            <p>El proyecto apunta a <strong>.NET Framework 4.8</strong>, incluido en Windows 10 y 11, así que no hace falta descargar runtimes adicionales para abrirlo en Visual Studio.</p>
+          </article>
+
+          <article class="doc-block" id="pdf">
+            <h2>12. Generación de PDF</h2>
+            <p><code>PresupuestoPdfService</code> recorre la lista polimórfica de ítems y escribe el documento directamente, sin librerías de terceros. <code>ConsultaPresupuestosForm</code> lo exporta bajo demanda con un <code>SaveFileDialog</code>.</p>
+          </article>
+
+          <article class="doc-block" id="reglas">
+            <h2>13. Reglas de negocio</h2>
+            <ul>
+              <li>Cliente, evento, fechas y duración válidos.</li>
+              <li>Salón y servicios seleccionados disponibles en el catálogo vigente.</li>
+              <li>Cantidades de adultos y niños no negativas.</li>
+              <li>Servicios personalizados con descripción y monto válidos.</li>
+              <li>Si queda un único menú principal sin invitados, esa fila se descarta.</li>
+              <li>Las particularidades (Celíaco, Vegetariano, Diabético, Vegano) forman parte del ítem y del PDF.</li>
+            </ul>
+          </article>
+
+          <article class="doc-block" id="decisiones">
+            <h2>14. Decisiones de diseño</h2>
+            <ul>
+              <li><strong>Singleton en memoria:</strong> mantiene una única fuente de datos durante la sesión sin perder rendimiento.</li>
+              <li><strong>Interfaces reales:</strong> permiten reemplazar implementaciones sin tocar controllers ni vistas.</li>
+              <li><strong>Persistencia XML:</strong> evita servidores, drivers y configuración externa.</li>
+              <li><strong>Snapshot por presupuesto:</strong> garantiza que el historial refleje lo presupuestado en su momento.</li>
+              <li><strong>Mapeo manual:</strong> da control total sobre modelos con propiedades de solo lectura e ítems polimórficos.</li>
+            </ul>
+            <div class="note">La persistencia es exclusivamente local: no existe capa de base de datos en el código.</div>
+          </article>
+
+          <article class="doc-block" id="ejecutar">
+            <h2>15. Ejecutar el código</h2>
+            <ol>
+              <li>Abrir <code>proyecto integrador.sln</code> en Visual Studio 2019 o 2022 con la carga de escritorio de .NET.</li>
+              <li>Seleccionar <strong>Debug</strong> o <strong>Release</strong> y presionar F5. No hay paquetes que restaurar.</li>
+              <li>Opcionalmente descargar el ZIP de esta página para probar el ejecutable sin compilar.</li>
+            </ol>
+            <p>
+              <a class="btn btn-blue btn-small" href="assets/descargas/PresupuestosEventos-v1.0-Windows.zip" download>Descargar ejecutable</a>
+              <a class="btn btn-ghost btn-small" style="background:#fff;color:#245b96;border-color:#bcd8ea" href="assets/descargas/LEEME.txt" download>Ver LEEME</a>
+            </p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span><strong>Presupuestos Eventos</strong> · Trabajo Práctico Integrador</span>
+    <span><a href="index.html">Demostración</a> · <a href="contacto.html">Contacto</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
