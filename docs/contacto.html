@@ -35,9 +35,23 @@
   <section class="section" style="padding-top:12px">
     <div class="container">
       <div class="email-card">
-        <small>Escribime directamente</small>
-        <a class="big-email" href="mailto:alteffjoaquin@gmail.com">alteffjoaquin@gmail.com</a>
-        <button class="btn btn-primary btn-small" type="button" id="copiarCorreo">📋 Copiar correo</button>
+        <small>Escribinos directamente</small>
+
+        <div class="email-row">
+          <div>
+            <span class="email-label">Contacto principal</span>
+            <a class="big-email compact" href="mailto:alteffjoaquin@gmail.com">alteffjoaquin@gmail.com</a>
+          </div>
+          <button class="btn btn-primary btn-small" type="button" data-copiar="alteffjoaquin@gmail.com">📋 Copiar</button>
+        </div>
+
+        <div class="email-row">
+          <div>
+            <span class="email-label">Contacto alternativo</span>
+            <a class="big-email compact" href="mailto:tutuluna580@gmail.com">tutuluna580@gmail.com</a>
+          </div>
+          <button class="btn btn-primary btn-small" type="button" data-copiar="tutuluna580@gmail.com">📋 Copiar</button>
+        </div>
       </div>
 
       <div class="contact-grid">
@@ -73,6 +87,13 @@
             <div class="field">
               <label for="cf-correo">Tu correo</label>
               <input type="email" id="cf-correo" name="correo" placeholder="nombre@ejemplo.com" required />
+            </div>
+            <div class="field">
+              <label for="cf-destino">Enviar a</label>
+              <select id="cf-destino" name="destino">
+                <option value="alteffjoaquin@gmail.com">alteffjoaquin@gmail.com</option>
+                <option value="tutuluna580@gmail.com">tutuluna580@gmail.com</option>
+              </select>
             </div>
             <div class="field">
               <label for="cf-tipo">Qué querés modificar</label>
