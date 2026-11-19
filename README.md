@@ -49,4 +49,5 @@ Para consultas sobre versiones personalizadas o modificaciones concretas:
 
 ```text
 alteffjoaquin@gmail.com
+tutuluna580@gmail.com
 ```

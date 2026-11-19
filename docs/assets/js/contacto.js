@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var CORREO = "alteffjoaquin@gmail.com";
+  var CORREO_PREDETERMINADO = "alteffjoaquin@gmail.com";
 
   function toast(mensaje) {
     var elemento = document.getElementById("toast");
@@ -11,27 +11,26 @@
     toast.timer = window.setTimeout(function () { elemento.classList.remove("show"); }, 2600);
   }
 
-  function copiar() {
+  function copiar(correo) {
     function ok() { toast("Correo copiado al portapapeles"); }
     function error() { toast("No se pudo copiar: seleccioná el correo manualmente"); }
 
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(CORREO).then(ok).catch(function () { fallback(); });
+      navigator.clipboard.writeText(correo).then(ok).catch(function () { fallback(); });
     } else {
       fallback();
     }
 
     function fallback() {
       var aux = document.createElement("textarea");
-      aux.value = CORREO;
+      aux.value = correo;
       aux.setAttribute("readonly", "");
       aux.style.position = "fixed";
       aux.style.opacity = "0";
       document.body.appendChild(aux);
       aux.select();
       try {
-        var copiado = document.execCommand("copy");
-        copiado ? ok() : error();
+        document.execCommand("copy") ? ok() : error();
       } catch (e) {
         error();
       }
@@ -44,6 +43,7 @@
 
     var nombre = document.getElementById("cf-nombre").value.trim();
     var correo = document.getElementById("cf-correo").value.trim();
+    var destino = document.getElementById("cf-destino").value || CORREO_PREDETERMINADO;
     var tipo = document.getElementById("cf-tipo").value;
     var mensaje = document.getElementById("cf-mensaje").value.trim();
 
@@ -59,7 +59,7 @@
     ].join("\n");
 
     var asunto = "Consulta sobre versión personalizada — " + tipo;
-    var url = "mailto:" + CORREO +
+    var url = "mailto:" + destino +
       "?subject=" + encodeURIComponent(asunto) +
       "&body=" + encodeURIComponent(cuerpo);
 
@@ -67,6 +67,12 @@
     toast("Abriendo tu cliente de correo…");
   }
 
-  document.getElementById("copiarCorreo").addEventListener("click", copiar);
+  var botones = document.querySelectorAll("[data-copiar]");
+  for (var i = 0; i < botones.length; i++) {
+    botones[i].addEventListener("click", function () {
+      copiar(this.getAttribute("data-copiar"));
+    });
+  }
+
   document.getElementById("formularioContacto").addEventListener("submit", enviar);
 })();

@@ -419,6 +419,13 @@ pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
 .email-card small { color: #9fe3da; text-transform: uppercase; letter-spacing: .1em; font-weight: 800; font-size: 11px; }
 .email-card a.big-email { display: block; color: #fff; font-size: clamp(24px, 4.5vw, 40px); font-weight: 800; letter-spacing: -.02em; margin: 10px 0 18px; word-break: break-word; }
 .email-card a.big-email:hover { color: #9fe3da; text-decoration: none; }
+.email-card a.big-email.compact { font-size: clamp(18px, 3vw, 26px); margin: 2px 0 0; }
+.email-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  text-align: left; padding: 16px 4px; border-top: 1px solid rgba(255,255,255,.16);
+}
+.email-row:first-of-type { border-top: 0; }
+.email-label { display: block; color: #9fe3da; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
 
 .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
 .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
